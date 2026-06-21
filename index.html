@@ -1,0 +1,4616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berry Loop — Small loop. Sharp apps.</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Berry Loop is an independent Android app studio creating offline-first, beautifully crafted utilities. Creator of DocXpress and Flow Finance.">
+  <meta name="keywords" content="Berry Loop, DocXpress, Flow Finance, Memora, Flutter Puzzle, indie app studio, offline-first apps, Android apps">
+  <meta name="author" content="Berry Loop">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://berryloop.com/">
+  <meta property="og:title" content="Berry Loop — Small loop. Sharp apps.">
+  <meta property="og:description" content="Berry Loop is an independent Android app studio creating offline-first, beautifully crafted utilities.">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Berry Loop — Small loop. Sharp apps.">
+  <meta property="twitter:description" content="Berry Loop is an independent Android app studio creating offline-first, beautifully crafted utilities.">
+
+  <!-- Dynamic SVG Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M30,50 C30,35 42,30 50,42 C58,30 70,35 70,50 C70,65 58,70 50,58 C42,70 30,65 30,50 Z' fill='none' stroke='%237A1F3D' stroke-width='8' stroke-linejoin='round'/%3E%3Ccircle cx='38' cy='44' r='8' fill='%237A1F3D'/%3E%3Ccircle cx='62' cy='56' r='8' fill='%239FE6B0'/%3E%3C/svg%3E">
+
+  <!-- Typography: Space Grotesk (Display) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       1. DESIGN SYSTEM & CSS VARIABLES
+       ============================================================ */
+    :root {
+      --bg-color: #0B0E0C;
+      --bg-card: rgba(15, 20, 17, 0.45);
+      --bg-nav: rgba(11, 14, 12, 0.75);
+      --border-color: rgba(138, 146, 142, 0.15);
+      --border-color-glow: rgba(159, 230, 176, 0.25);
+      
+      --accent-berry: #7A1F3D;
+      --accent-berry-glow: rgba(122, 31, 61, 0.45);
+      --accent-berry-bright: #A82C54;
+      --accent-mint: #9FE6B0;
+      --accent-mint-glow: rgba(159, 230, 176, 0.25);
+      --accent-mint-dim: #71b883;
+      --accent-gold: #dfb72c;
+
+      --text-main: #F3F5F4;
+      --text-muted: #8A928E;
+      --text-dark: #050706;
+
+      --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      
+      --transition-base: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-spring: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      --transition-smooth: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      
+      --max-width: 1200px;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ============================================================
+       2. MODERN RESET
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      min-height: 100vh;
+      line-height: 1.6;
+      background-color: var(--bg-color);
+      /* overflow-x: hidden removed to fix GSAP ScrollTrigger pinning */
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    button { font-family: inherit; }
+
+    /* ============================================================
+       3. PRELOADER
+       ============================================================ */
+    .preloader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99999;
+      background: linear-gradient(135deg, #0f1210 0%, #0B0E0C 40%, #12181a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      transition: opacity 0.8s var(--ease-out-expo);
+    }
+
+    .preloader.revealing {
+      mask-image: radial-gradient(
+        circle at center,
+        transparent 0,
+        transparent calc(var(--reveal-radius, 0vmax) - 14vmax),
+        rgba(0,0,0,0.34) calc(var(--reveal-radius, 0vmax) - 8vmax),
+        rgba(0,0,0,0.72) calc(var(--reveal-radius, 0vmax) - 3vmax),
+        #000 var(--reveal-radius, 0vmax),
+        #000 100%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle at center,
+        transparent 0,
+        transparent calc(var(--reveal-radius, 0vmax) - 14vmax),
+        rgba(0,0,0,0.34) calc(var(--reveal-radius, 0vmax) - 8vmax),
+        rgba(0,0,0,0.72) calc(var(--reveal-radius, 0vmax) - 3vmax),
+        #000 var(--reveal-radius, 0vmax),
+        #000 100%
+      );
+      mask-repeat: no-repeat;
+      -webkit-mask-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    .preloader-logo {
+      width: 80px;
+      height: 80px;
+      animation: pulseGlow 2s ease-in-out infinite alternate;
+    }
+
+    .preloader-counter {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, var(--accent-mint) 0%, var(--accent-berry-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .preloader-text {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .preloader-bar-track {
+      width: 200px;
+      height: 2px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .preloader-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-berry-bright), var(--accent-mint));
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    /* ============================================================
+       4. PAGE TRANSITION OVERLAY
+       ============================================================ */
+    .page-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-color);
+      z-index: 99998;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s var(--ease-out-expo);
+    }
+
+    /* ============================================================
+       5. SCROLL PROGRESS BAR
+       ============================================================ */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-berry-bright), var(--accent-mint), var(--accent-gold));
+      z-index: 10001;
+      transition: none;
+      will-change: width;
+    }
+
+    /* ============================================================
+       6. AMBIENT MOUSE GLOW
+       ============================================================ */
+    .bg-glow-aura {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(159, 230, 176, 0.16) 0%, rgba(122, 31, 61, 0.14) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+      mix-blend-mode: screen;
+      filter: blur(40px);
+      opacity: 0.7;
+    }
+
+    /* ============================================================
+       7. FILM GRAIN NOISE OVERLAY
+       ============================================================ */
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* ============================================================
+       8. CUSTOM INTERACTIVE CURSOR
+       ============================================================ */
+    .custom-cursor {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--accent-mint);
+      border-radius: 50%;
+      position: fixed;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10000;
+      transition: width 0.3s var(--ease-out-expo), 
+                  height 0.3s var(--ease-out-expo), 
+                  background-color 0.3s var(--ease-out-expo), 
+                  border-color 0.3s var(--ease-out-expo),
+                  opacity 0.3s var(--ease-out-expo);
+      mix-blend-mode: difference;
+      opacity: 0;
+    }
+
+    .custom-cursor.visible { opacity: 1; }
+
+    .custom-cursor-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-mint);
+      border-radius: 50%;
+      position: fixed;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10001;
+      opacity: 0;
+      transition: opacity 0.3s var(--ease-out-expo);
+    }
+
+    .custom-cursor-dot.visible { opacity: 1; }
+
+    .custom-cursor.hover {
+      width: 54px;
+      height: 54px;
+      background-color: rgba(159, 230, 176, 0.1);
+      border-color: var(--accent-mint);
+    }
+
+    .custom-cursor.click {
+      width: 24px;
+      height: 24px;
+      background-color: rgba(159, 230, 176, 0.3);
+      border-color: var(--accent-mint);
+    }
+
+    @media (pointer: coarse) {
+      .custom-cursor, .custom-cursor-dot {
+        display: none !important;
+      }
+    }
+
+    /* ============================================================
+       9. WEBGL CANVAS LAYER
+       ============================================================ */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      transition: background 0.8s ease;
+      background: radial-gradient(circle at 50% 50%, rgba(122, 31, 61, 0.08) 0%, rgba(15, 230, 176, 0.03) 60%, #0B0E0C 100%);
+    }
+
+    /* ============================================================
+       10. GRID OVERLAY
+       ============================================================ */
+    .grid-overlay {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--max-width);
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 0 2rem;
+    }
+
+    .grid-overlay-line {
+      height: 100%;
+      border-left: 1px solid rgba(138, 146, 142, 0.04);
+    }
+    .grid-overlay-line:last-child {
+      border-right: 1px solid rgba(138, 146, 142, 0.04);
+    }
+
+    /* ============================================================
+       11. NAVIGATION
+       ============================================================ */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      background: var(--bg-nav);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      transition: transform 0.5s var(--ease-out-expo), background 0.5s var(--ease-out-expo);
+    }
+
+    header.hidden {
+      transform: translateY(-100%);
+    }
+
+    .nav-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-main);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      transition: transform 0.6s var(--ease-spring);
+    }
+
+    .logo-link:hover .logo-icon {
+      transform: rotate(180deg);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      transition: var(--transition-base);
+      position: relative;
+      padding: 0.25rem 0;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background-color: var(--accent-mint);
+      transition: var(--transition-base);
+    }
+
+    .nav-links a:hover { color: var(--text-main); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .cta-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.6rem 1.2rem;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition-base);
+    }
+
+    .cta-nav-btn:hover {
+      background: var(--text-main);
+      color: var(--bg-color);
+      border-color: var(--text-main);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Mobile menu button */
+    .mobile-menu-btn {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition-base);
+    }
+
+    .mobile-menu-btn span {
+      display: block;
+      width: 18px;
+      height: 1.5px;
+      background: var(--text-main);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: var(--transition-base);
+    }
+
+    .mobile-menu-btn span:nth-child(1) { top: 16px; }
+    .mobile-menu-btn span:nth-child(2) { top: 21px; }
+    .mobile-menu-btn span:nth-child(3) { top: 26px; }
+
+    /* ============================================================
+       12. MAIN CONTENT
+       ============================================================ */
+    main {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    section {
+      width: 100%;
+      max-width: var(--max-width);
+      min-height: 100vh;
+      padding: 6rem 2rem 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ============================================================
+       13. HERO SECTION
+       ============================================================ */
+    #hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 8rem;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      z-index: 5;
+    }
+
+    .studio-label {
+      font-family: var(--font-display);
+      color: var(--accent-mint);
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .studio-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-mint);
+      box-shadow: 0 0 12px var(--accent-mint);
+      animation: pulseGlow 2s ease-in-out infinite alternate;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    .hero-title .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(100%);
+      transition: transform 0.6s var(--ease-out-expo), opacity 0.6s var(--ease-out-expo);
+    }
+
+    .hero-title .char.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-title .line-2 {
+      display: block;
+    }
+
+    .hero-title span.accent {
+      color: var(--accent-mint);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent-mint) 0%, #4ade80 50%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      background-size: 200% 200%;
+      animation: gradientShift 6s ease-in-out infinite;
+    }
+
+    .gradient-text .char {
+      background: linear-gradient(135deg, var(--accent-mint) 0%, #4ade80 50%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      color: var(--text-muted);
+      max-width: 480px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .hero-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--accent-mint);
+      color: var(--bg-color);
+      padding: 0.9rem 2rem;
+      border-radius: 99px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-spring);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s var(--ease-out-expo), height 0.6s var(--ease-out-expo);
+    }
+
+    .hero-btn-primary:hover::before {
+      width: 300%;
+      height: 300%;
+    }
+
+    .hero-btn-primary:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(159, 230, 176, 0.3);
+    }
+
+    .hero-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: transparent;
+      color: var(--text-main);
+      padding: 0.9rem 2rem;
+      border-radius: 99px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+
+    .hero-btn-secondary:hover {
+      border-color: var(--accent-mint);
+      color: var(--accent-mint);
+      transform: translateY(-2px);
+    }
+
+    /* Scroll Cue */
+    .scroll-cue {
+      position: absolute;
+      bottom: 3rem;
+      left: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: var(--transition-base);
+      opacity: 0;
+    }
+
+    .scroll-cue:hover { color: var(--text-main); }
+
+    .scroll-cue-indicator {
+      width: 24px;
+      height: 40px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      position: relative;
+    }
+
+    .scroll-cue-indicator::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 8px;
+      background-color: var(--accent-mint);
+      border-radius: 2px;
+      animation: scrollWheel 2s infinite var(--ease-out-expo);
+    }
+
+    /* Fallback SVG centerpiece */
+    .fallback-centerpiece {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      width: 450px;
+      height: 450px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .no-webgl .fallback-centerpiece { display: block; }
+
+    .fallback-svg { width: 100%; height: 100%; }
+
+    .fb-vine {
+      stroke: var(--accent-mint);
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawCurve 8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+    }
+
+    .fb-berry-1 {
+      fill: var(--accent-berry);
+      filter: drop-shadow(0 0 15px var(--accent-berry-glow));
+      animation: pulseNode 3s ease-in-out infinite alternate;
+    }
+
+    .fb-berry-2 {
+      fill: var(--accent-mint);
+      filter: drop-shadow(0 0 15px var(--accent-mint-glow));
+      animation: pulseNode 3s ease-in-out infinite alternate-reverse;
+    }
+
+    /* ============================================================
+       14. APP SHOWCASE SECTION
+       ============================================================ */
+    #showcase-pin-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    #showcase {
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4rem;
+      padding: 4rem 2rem 2rem;
+      height: 100vh;
+      height: 100dvh;
+      position: sticky;
+      top: 0;
+      overflow: hidden;
+    }
+
+    .showcase-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .showcase-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .showcase-header p {
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+
+    /* Horizontal scroll container */
+    .horizontal-scroll-section {
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .horizontal-scroll-track {
+      display: flex;
+      gap: 3rem;
+      padding: 2rem;
+      will-change: transform;
+      width: max-content;
+    }
+
+    .app-showcase-card {
+      flex: 0 0 85vw;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 3rem;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2.5rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: var(--transition-base);
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+
+    .app-showcase-card.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .app-showcase-card:hover {
+      border-color: var(--border-color-glow);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(159, 230, 176, 0.03);
+    }
+
+    /* Interactive 3D card visual */
+    .app-visual-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+      overflow: hidden;
+      transition: var(--transition-base);
+    }
+
+    .app-visual-wrapper:hover {
+      border-color: var(--border-color-glow);
+      box-shadow: inset 0 0 20px rgba(159, 230, 176, 0.05);
+    }
+
+    .card-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      cursor: grab;
+      z-index: 2;
+      background: transparent;
+    }
+
+    .card-canvas:active { cursor: grabbing; }
+
+    .app-fallback-icon {
+      position: absolute;
+      width: 45%;
+      height: 45%;
+      object-fit: contain;
+      border-radius: 20%;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      z-index: 1;
+      opacity: 1;
+      transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-spring);
+      pointer-events: none;
+    }
+
+    .app-visual-wrapper:hover .app-fallback-icon {
+      transform: scale(1.05);
+    }
+
+    /* App info */
+    .app-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .app-title-header {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .app-title-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: var(--transition-spring);
+    }
+
+    .app-showcase-card:hover .app-title-icon {
+      transform: scale(1.1) rotate(6deg);
+      border-color: var(--border-color-glow);
+      box-shadow: 0 6px 18px rgba(159, 230, 176, 0.2);
+    }
+
+    .app-badge {
+      align-self: flex-start;
+      padding: 0.4rem 1rem;
+      border-radius: 99px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+
+    .app-badge.live {
+      background: rgba(122, 31, 61, 0.2);
+      color: #FF5A8D;
+      border-color: rgba(122, 31, 61, 0.4);
+    }
+
+    .app-badge.soon {
+      background: rgba(159, 230, 176, 0.1);
+      color: var(--accent-mint);
+      border-color: rgba(159, 230, 176, 0.3);
+    }
+
+    .app-title-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .app-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .app-desc {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .features-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      list-style: none;
+    }
+
+    .features-list li {
+      position: relative;
+      padding-left: 1.75rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      transition: var(--transition-base);
+    }
+
+    .features-list li::before {
+      content: '';
+      position: absolute;
+      left: 0.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-mint);
+      box-shadow: 0 0 8px var(--accent-mint);
+    }
+
+    .features-list li strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .features-list li:hover {
+      color: var(--text-main);
+      transform: translateX(4px);
+    }
+
+    /* Specs grid */
+    .app-specs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.015);
+      backdrop-filter: blur(8px);
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .spec-label {
+      font-size: 0.7rem;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .spec-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-mint);
+    }
+
+    /* CTA group */
+    .app-cta-group {
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .play-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--text-main);
+      color: var(--bg-color);
+      border: 1px solid var(--text-main);
+      padding: 0.8rem 1.5rem;
+      border-radius: 99px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition-spring);
+    }
+
+    .play-store-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .play-store-btn:hover {
+      background: transparent;
+      color: var(--text-main);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Notify form */
+    .notify-form {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 380px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 99px;
+      padding: 0.3rem 0.3rem 0.3rem 1.2rem;
+      transition: var(--transition-base);
+    }
+
+    .notify-form:focus-within {
+      border-color: var(--accent-mint);
+      box-shadow: 0 0 15px rgba(159, 230, 176, 0.15);
+    }
+
+    .notify-input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      outline: none;
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .notify-input::placeholder {
+      color: rgba(138, 146, 142, 0.5);
+    }
+
+    .notify-btn {
+      background: var(--accent-mint);
+      color: var(--bg-color);
+      border: none;
+      padding: 0.65rem 1.2rem;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-base);
+      white-space: nowrap;
+    }
+
+    .notify-btn:hover {
+      background: var(--text-main);
+      transform: scale(1.02);
+    }
+
+    .form-message {
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      padding-left: 1rem;
+      opacity: 0;
+      transform: translateY(-5px);
+      transition: var(--transition-base);
+    }
+
+    .form-message.success {
+      color: var(--accent-mint);
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .form-message.error {
+      color: #FF5A8D;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ============================================================
+       15. FEATURES HUB
+       ============================================================ */
+    #docs-hub {
+      min-height: auto;
+      padding: 6rem 2rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .docs-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .docs-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .docs-header p {
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+
+    .docs-card-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .docs-tabs-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .docs-tabs-nav::-webkit-scrollbar { display: none; }
+
+    .docs-tab-btn {
+      flex: 1;
+      min-width: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1.2rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition-base);
+      white-space: nowrap;
+    }
+
+    .docs-tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent-mint);
+      transform: scaleX(0);
+      transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    .docs-tab-btn.active {
+      color: var(--accent-mint);
+    }
+
+    .docs-tab-btn.active::after {
+      transform: scaleX(1);
+    }
+
+    .docs-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tab-btn-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      object-fit: contain;
+      transition: var(--transition-spring);
+    }
+
+    .docs-tab-btn:hover .tab-btn-icon,
+    .docs-tab-btn.active .tab-btn-icon {
+      border-color: var(--accent-mint);
+      transform: scale(1.1);
+    }
+
+    .docs-tabs-content {
+      padding: 2rem;
+    }
+
+    .docs-tab-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+    }
+
+    .docs-tab-panel.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+    }
+
+    .panel-column-left h4,
+    .panel-column-right h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .panel-column-left h4 + .tech-table-wrapper { margin-bottom: 2rem; }
+
+    .tech-table-wrapper {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .tech-table th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.8rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tech-table td {
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(138, 146, 142, 0.07);
+      transition: var(--transition-base);
+    }
+
+    .tech-table tr:last-child td { border-bottom: none; }
+
+    .tech-table tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+      color: var(--text-main);
+    }
+
+    .tech-table td strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .interactive-highlights {
+      padding: 1.5rem;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .interactive-highlights p {
+      margin-bottom: 1.2rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .highlights-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .highlights-list li {
+      position: relative;
+      padding-left: 1.25rem;
+    }
+
+    .highlights-list li .arrow {
+      position: absolute;
+      left: 0;
+      color: var(--accent-mint);
+    }
+
+    /* ============================================================
+       16. PHILOSOPHY SECTION
+       ============================================================ */
+    #philosophy {
+      min-height: auto;
+      padding: 6rem 2rem 4rem 2rem;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      background: radial-gradient(ellipse at 50% 100%, rgba(122, 31, 61, 0.08) 0%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .phil-container {
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .phil-icon-loop {
+      width: 60px;
+      height: 60px;
+      color: var(--accent-mint);
+      animation: floatSmooth 6s ease-in-out infinite;
+    }
+
+    .phil-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4.5vw, 3.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .phil-title span.accent { color: var(--accent-mint); }
+
+    .phil-body {
+      color: var(--text-muted);
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      line-height: 1.7;
+      font-weight: 400;
+    }
+
+    .phil-body strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* Philosophy Cards */
+    .phil-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      width: 100%;
+    }
+
+    .phil-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(8px);
+      transition: var(--transition-base);
+    }
+
+    .phil-card:hover {
+      border-color: var(--border-color-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+
+    .phil-card-icon {
+      width: 48px;
+      height: 48px;
+      color: var(--accent-mint);
+    }
+
+    .phil-card h4 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .phil-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* ============================================================
+       17. FOOTER
+       ============================================================ */
+    footer {
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 8rem 2rem 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6rem;
+      z-index: 5;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .footer-brand .logo-link { font-size: 1.5rem; }
+
+    .footer-brand p {
+      color: var(--text-muted);
+      max-width: 320px;
+      font-size: 0.95rem;
+    }
+
+    .footer-connect {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .footer-heading {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .contact-email-link {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      transition: var(--transition-base);
+      display: inline-block;
+    }
+
+    .contact-email-link:hover {
+      color: var(--accent-mint);
+      transform: translateX(6px);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 2.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .footer-badges {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .play-store-badge {
+      display: inline-block;
+      height: 38px;
+      opacity: 0.7;
+      transition: var(--transition-base);
+    }
+
+    .play-store-badge:hover {
+      opacity: 1;
+      transform: scale(1.03);
+    }
+
+    /* ============================================================
+       18. THEME SWITCHER
+       ============================================================ */
+    #theme-switcher-container {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      z-index: 200;
+    }
+
+    #theme-toggle-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: rgba(11, 14, 12, 0.8);
+      backdrop-filter: blur(8px);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: var(--transition-base);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    #theme-toggle-btn:hover {
+      border-color: var(--accent-mint);
+      color: var(--accent-mint);
+      transform: scale(1.05);
+    }
+
+    #theme-toggle-btn svg {
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+
+    #theme-switcher-container:hover #theme-toggle-btn svg {
+      transform: rotate(180deg);
+    }
+
+    #theme-menu {
+      position: absolute;
+      bottom: 58px;
+      left: 0;
+      background: rgba(11, 14, 12, 0.95);
+      border: 1px solid var(--border-color-glow);
+      border-radius: 12px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: scale(0.8) translate(-10px, 10px);
+      transform-origin: bottom left;
+      pointer-events: none;
+      transition: opacity 0.3s var(--ease-out-expo), transform 0.3s var(--ease-out-expo);
+    }
+
+    #theme-switcher-container:hover #theme-menu,
+    #theme-switcher-container:focus-within #theme-menu {
+      opacity: 1;
+      transform: scale(1) translate(0, 0);
+      pointer-events: auto;
+    }
+
+    .theme-option {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-family: var(--font-display);
+      font-weight: 500;
+      text-align: left;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-base);
+      width: 100%;
+    }
+
+    .theme-option:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .theme-option.active {
+      color: var(--accent-mint);
+      background: rgba(159, 230, 176, 0.05);
+    }
+
+    /* ============================================================
+       19. CASHEW MASCOT
+       ============================================================ */
+    #mascot-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+    }
+
+    #mascot-speech {
+      max-width: 280px;
+      background: rgba(11, 14, 12, 0.92);
+      border: 1px solid var(--border-color-glow);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+      position: relative;
+    }
+
+    #mascot-speech.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .speech-close-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      transition: color 0.2s;
+    }
+
+    .speech-close-btn:hover { color: var(--text-main); }
+
+    #mascot-berry {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ff4b72, #9b1b3b);
+      box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), inset 10px 10px 20px rgba(255,255,255,0.4), 0 15px 30px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .mascot-leaf {
+      position: absolute;
+      top: -10px;
+      right: 15px;
+      width: 28px;
+      height: 16px;
+      background: #4ade80;
+      border-radius: 0 15px 0 15px;
+      box-shadow: inset -3px -3px 6px rgba(0,0,0,0.2);
+      transform-origin: bottom left;
+      animation: leafWiggle 3s ease-in-out infinite;
+    }
+
+    @keyframes leafWiggle {
+      0%, 100% { transform: rotate(15deg); }
+      50% { transform: rotate(25deg); }
+    }
+
+    #mascot-berry:hover {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    #mascot-berry.bounce {
+      animation: mascotBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .mascot-face {
+      width: 60px;
+      height: 60px;
+      z-index: 2;
+    }
+
+    .mascot-eye-lid {
+      transition: transform 0.15s ease;
+      transform-origin: center center;
+    }
+
+    .mascot-pupil {
+      fill: var(--text-dark);
+      transition: transform 0.1s ease-out;
+    }
+
+    .mascot-mouth {
+      stroke: var(--text-dark);
+      stroke-width: 3;
+      stroke-linecap: round;
+      fill: none;
+      transition: d 0.3s ease;
+    }
+
+    /* ============================================================
+       20. SCROLL REVEALS
+       ============================================================ */
+    .reveal-element {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 1.0s var(--ease-out-expo), 
+                  transform 1.0s var(--ease-out-expo);
+    }
+
+    .reveal-element.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger delays */
+    .reveal-element:nth-child(2) { transition-delay: 0.1s; }
+    .reveal-element:nth-child(3) { transition-delay: 0.2s; }
+    .reveal-element:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ============================================================
+       21. MAGNETIC BUTTON EFFECT
+       ============================================================ */
+    .magnetic-btn {
+      transition: transform 0.3s var(--ease-out-expo);
+    }
+
+    /* ============================================================
+       22. ANIMATED MARQUEE / TICKER
+       ============================================================ */
+    .marquee-section {
+      width: 100%;
+      overflow: hidden;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.5rem 0;
+      position: relative;
+      z-index: 5;
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 30s linear infinite;
+    }
+
+    .marquee-track:hover {
+      animation-play-state: paused;
+    }
+
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 0 2rem;
+      white-space: nowrap;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      transition: color 0.3s ease;
+    }
+
+    .marquee-item:hover {
+      color: var(--accent-mint);
+    }
+
+    .marquee-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-berry);
+      box-shadow: 0 0 10px var(--accent-berry-glow);
+      flex-shrink: 0;
+    }
+
+    .marquee-dot.mint {
+      background: var(--accent-mint);
+      box-shadow: 0 0 10px var(--accent-mint-glow);
+    }
+
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ============================================================
+       23. STATS COUNTER SECTION
+       ============================================================ */
+    #stats {
+      min-height: auto;
+      padding: 8rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .stats-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .stats-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .stats-header p {
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      width: 100%;
+      max-width: var(--max-width);
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-berry-bright), var(--accent-mint), var(--accent-gold));
+      background-size: 200% 100%;
+      animation: gradientShift 4s ease-in-out infinite;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-color-glow);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-card-icon {
+      width: 48px;
+      height: 48px;
+      color: var(--accent-mint);
+      opacity: 0.7;
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--accent-mint) 0%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-detail {
+      font-size: 0.75rem;
+      color: var(--accent-mint-dim);
+      font-weight: 400;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: var(--transition-base);
+    }
+
+    .stat-card:hover .stat-detail {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============================================================
+       24. MOBILE DRAWER MENU
+       ============================================================ */
+    .mobile-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      background: rgba(11, 14, 12, 0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 9999;
+      transform: translateX(100%);
+      transition: transform 0.6s var(--ease-out-expo);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .mobile-drawer.open {
+      transform: translateX(0);
+    }
+
+    .mobile-drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .mobile-drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mobile-drawer-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-base);
+    }
+
+    .mobile-drawer-close:hover {
+      border-color: var(--accent-mint);
+      color: var(--accent-mint);
+    }
+
+    .mobile-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .mobile-nav-list li {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+    }
+
+    .mobile-drawer.open .mobile-nav-list li {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .mobile-drawer.open .mobile-nav-list li:nth-child(1) { transition-delay: 0.1s; }
+    .mobile-drawer.open .mobile-nav-list li:nth-child(2) { transition-delay: 0.15s; }
+    .mobile-drawer.open .mobile-nav-list li:nth-child(3) { transition-delay: 0.2s; }
+    .mobile-drawer.open .mobile-nav-list li:nth-child(4) { transition-delay: 0.25s; }
+    .mobile-drawer.open .mobile-nav-list li:nth-child(5) { transition-delay: 0.3s; }
+
+    .mobile-nav-list a {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+      transition: color 0.3s ease;
+      display: block;
+    }
+
+    .mobile-nav-list a:hover {
+      color: var(--accent-mint);
+    }
+
+    .mobile-drawer-footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-color);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s var(--ease-out-expo) 0.35s, transform 0.5s var(--ease-out-expo) 0.35s;
+    }
+
+    .mobile-drawer.open .mobile-drawer-footer {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-drawer-footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* ============================================================
+       25. CINEMATIC SECTION DIVIDERS
+       ============================================================ */
+    .section-divider {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+      z-index: 4;
+    }
+
+    .section-divider-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, 
+        transparent 0%, 
+        rgba(122, 31, 61, 0.04) 30%, 
+        rgba(159, 230, 176, 0.03) 70%, 
+        transparent 100%);
+    }
+
+    .section-divider-line {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-mint-dim), transparent);
+      transition: width 1.5s var(--ease-out-expo);
+    }
+
+    .section-divider.revealed .section-divider-line {
+      width: 60%;
+    }
+
+    /* ============================================================
+       26. TEXT SPLIT REVEAL ANIMATION
+       ============================================================ */
+    .text-split-reveal {
+      overflow: hidden;
+    }
+
+    .text-split-reveal .word {
+      display: inline-block;
+      overflow: hidden;
+    }
+
+    .text-split-reveal .word-inner {
+      display: inline-block;
+      transform: translateY(100%);
+      transition: transform 0.8s var(--ease-out-expo);
+    }
+
+    .text-split-reveal.revealed .word-inner {
+      transform: translateY(0);
+    }
+
+    /* Stagger each word */
+    .text-split-reveal.revealed .word:nth-child(1) .word-inner { transition-delay: 0.0s; }
+    .text-split-reveal.revealed .word:nth-child(2) .word-inner { transition-delay: 0.05s; }
+    .text-split-reveal.revealed .word:nth-child(3) .word-inner { transition-delay: 0.1s; }
+    .text-split-reveal.revealed .word:nth-child(4) .word-inner { transition-delay: 0.15s; }
+    .text-split-reveal.revealed .word:nth-child(5) .word-inner { transition-delay: 0.2s; }
+    .text-split-reveal.revealed .word:nth-child(6) .word-inner { transition-delay: 0.25s; }
+    .text-split-reveal.revealed .word:nth-child(7) .word-inner { transition-delay: 0.3s; }
+    .text-split-reveal.revealed .word:nth-child(8) .word-inner { transition-delay: 0.35s; }
+    .text-split-reveal.revealed .word:nth-child(9) .word-inner { transition-delay: 0.4s; }
+    .text-split-reveal.revealed .word:nth-child(10) .word-inner { transition-delay: 0.45s; }
+
+    /* ============================================================
+       27. ANIMATED GLOW BORDER CARDS
+       ============================================================ */
+    .glow-border-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .glow-border-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        var(--accent-mint) 60deg,
+        transparent 120deg,
+        var(--accent-berry-bright) 180deg,
+        transparent 240deg,
+        var(--accent-gold) 300deg,
+        transparent 360deg
+      );
+      border-radius: inherit;
+      z-index: -1;
+      animation: rotateSlow 8s linear infinite;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .glow-border-card:hover::before {
+      opacity: 0.6;
+    }
+
+    .glow-border-card-inner {
+      background: var(--bg-color);
+      border-radius: 18px;
+      padding: 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       28. FLOATING ORBS BACKGROUND
+       ============================================================ */
+    .floating-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .floating-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.03;
+      will-change: transform;
+    }
+
+    .floating-orb:nth-child(1) {
+      width: 500px;
+      height: 500px;
+      background: var(--accent-berry);
+      top: 10%;
+      left: -10%;
+      animation: floatOrb1 20s ease-in-out infinite;
+    }
+
+    .floating-orb:nth-child(2) {
+      width: 400px;
+      height: 400px;
+      background: var(--accent-mint);
+      top: 50%;
+      right: -5%;
+      animation: floatOrb2 25s ease-in-out infinite;
+    }
+
+    .floating-orb:nth-child(3) {
+      width: 350px;
+      height: 350px;
+      background: var(--accent-gold);
+      bottom: 10%;
+      left: 30%;
+      animation: floatOrb3 18s ease-in-out infinite;
+    }
+
+    @keyframes floatOrb1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, 80px) scale(1.1); }
+      50% { transform: translate(-30px, 120px) scale(0.95); }
+      75% { transform: translate(70px, -40px) scale(1.05); }
+    }
+
+    @keyframes floatOrb2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-60px, -50px) scale(1.15); }
+      66% { transform: translate(40px, 70px) scale(0.9); }
+    }
+
+    @keyframes floatOrb3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-80px, -60px) scale(1.1); }
+    }
+
+    /* ============================================================
+       29. TESTIMONIAL / PROCESS SECTION
+       ============================================================ */
+    #process {
+      min-height: auto;
+      padding: 8rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4rem;
+      position: relative;
+      z-index: 5;
+    }
+
+    .process-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .process-header h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .process-header p {
+      color: var(--text-muted);
+      max-width: 500px;
+    }
+
+    .process-timeline {
+      width: 100%;
+      max-width: var(--max-width);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .process-timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-berry-bright), var(--accent-mint), var(--accent-gold));
+      transform: translateX(-50%);
+      opacity: 0.3;
+    }
+
+    .process-step {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2rem;
+      align-items: center;
+      padding: 2rem 0;
+    }
+
+    .process-step:nth-child(even) .process-step-content {
+      grid-column: 3;
+      text-align: left;
+    }
+
+    .process-step:nth-child(even) .process-step-spacer {
+      grid-column: 1;
+    }
+
+    .process-step-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: var(--transition-base);
+    }
+
+    .process-step-content:hover {
+      border-color: var(--border-color-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .process-step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: 2px solid var(--accent-mint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent-mint);
+      z-index: 2;
+      box-shadow: 0 0 20px rgba(159, 230, 176, 0.15);
+    }
+
+    .process-step-content h4 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .process-step-content p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .process-step-spacer {
+      /* Empty spacer for grid alignment */
+    }
+
+    @media (max-width: 768px) {
+      .process-timeline::before { left: 24px; }
+      .process-step {
+        grid-template-columns: auto 1fr;
+        gap: 1.5rem;
+      }
+      .process-step:nth-child(even) .process-step-content { grid-column: 2; text-align: left; }
+      .process-step:nth-child(even) .process-step-spacer { display: none; }
+      .process-step-spacer { display: none; }
+    }
+
+    /* ============================================================
+       30. ENHANCED SCROLL CARD DEPTH
+       ============================================================ */
+    .depth-layer {
+      transition: transform 0.6s var(--ease-out-expo);
+      will-change: transform;
+    }
+
+    .depth-layer-1 { transform: translateZ(0); }
+    .depth-layer-2 { transform: translateZ(20px); }
+    .depth-layer-3 { transform: translateZ(40px); }
+
+    /* ============================================================
+       31. GRADIENT ANIMATED BORDER BUTTON
+       ============================================================ */
+    .gradient-border-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2rem;
+      border-radius: 99px;
+      background: var(--bg-color);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      overflow: visible;
+      isolation: isolate;
+    }
+
+    .gradient-border-btn::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      background: conic-gradient(from 0deg, var(--accent-mint), var(--accent-berry-bright), var(--accent-gold), var(--accent-mint));
+      z-index: -2;
+      animation: rotateSlow 4s linear infinite;
+    }
+
+    .gradient-border-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--bg-color);
+      z-index: -1;
+    }
+
+    .gradient-border-btn:hover {
+      color: var(--accent-mint);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(159, 230, 176, 0.15);
+    }
+
+    /* ============================================================
+       22. KEYFRAME ANIMATIONS
+       ============================================================ */
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 4px rgba(159, 230, 176, 0.3)); transform: scale(1); }
+      100% { filter: drop-shadow(0 0 16px rgba(159, 230, 176, 0.6)); transform: scale(1.05); }
+    }
+
+    @keyframes scrollWheel {
+      0% { top: 6px; opacity: 0; }
+      30% { opacity: 1; }
+      60% { top: 22px; opacity: 0; }
+      100% { top: 6px; opacity: 0; }
+    }
+
+    @keyframes floatSmooth {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(5deg); }
+    }
+
+    @keyframes drawCurve {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes pulseNode {
+      0% { r: 12; opacity: 0.8; }
+      100% { r: 16; opacity: 1; }
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes mascotBounce {
+      0% { transform: scale(1); }
+      30% { transform: scale(0.85, 1.15); }
+      60% { transform: scale(1.1, 0.9); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes rotateSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes borderGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(159, 230, 176, 0); }
+      50% { box-shadow: 0 0 25px rgba(159, 230, 176, 0.15); }
+    }
+
+    @keyframes textRevealUp {
+      from { transform: translateY(110%); }
+      to { transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes lineExpand {
+      from { width: 0; }
+      to { width: 60%; }
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.5; filter: blur(60px); }
+      50% { opacity: 0.08; filter: blur(100px); }
+    }
+
+    /* ============================================================
+       23. RESPONSIVENESS
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto !important; }
+      .fb-vine, .fb-berry-1, .fb-berry-2, .scroll-cue-indicator::before, .phil-icon-loop { animation: none !important; }
+      #canvas-container { display: none !important; }
+      .no-webgl .fallback-centerpiece { display: block !important; }
+      .fb-vine { stroke-dashoffset: 0 !important; }
+      .reveal-element { opacity: 1 !important; transform: none !important; }
+      .hero-title .char { opacity: 1 !important; transform: none !important; }
+    }
+
+    @media (max-width: 1024px) {
+      .grid-overlay {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .grid-overlay-line:nth-child(3),
+      .grid-overlay-line:nth-child(4) { display: none; }
+      
+      #hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding-top: 10rem;
+        min-height: 80vh;
+      }
+      
+      .hero-content { align-items: center; }
+      .hero-tagline { text-align: center; }
+      .hero-cta-group { justify-content: center; }
+      .scroll-cue { display: none; }
+
+      .app-showcase-card {
+        flex: 0 0 90vw;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .app-visual-wrapper {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .panel-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; gap: 3rem; }
+      .phil-cards { grid-template-columns: 1fr; }
+
+      .no-webgl .fallback-centerpiece {
+        position: relative;
+        right: auto; top: auto;
+        transform: none;
+        width: 320px;
+        height: 320px;
+        margin: 2rem auto;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+
+      #theme-switcher-container { bottom: 1.25rem; left: 1.25rem; }
+      #theme-toggle-btn { width: 42px; height: 42px; }
+      #theme-menu { bottom: 50px; }
+
+      #mascot-container { bottom: 1.25rem; right: 1.25rem; }
+      #mascot-berry { width: 70px; height: 70px; }
+      #mascot-speech { max-width: 240px; }
+    }
+
+    @media (max-width: 480px) {
+      section { padding: 5rem 1.25rem 3rem 1.25rem; }
+      .nav-container { padding: 1rem 1.25rem; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+      .app-showcase-card { padding: 1.5rem; }
+      .app-specs-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       PRELOADER
+       ============================================================ -->
+  <div id="preloader" class="preloader">
+    <svg class="preloader-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="30" ry="20" transform="rotate(-15 50 50)" stroke="#F3F5F4" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="32" cy="42" r="8.5" fill="#7A1F3D" />
+      <circle cx="68" cy="58" r="8.5" fill="#9FE6B0" />
+    </svg>
+    <div class="preloader-counter" id="preloader-counter">0</div>
+    <div class="preloader-text">Loading Experience</div>
+    <div class="preloader-bar-track">
+      <div class="preloader-bar-fill" id="preloader-bar"></div>
+    </div>
+  </div>
+
+  <!-- Page Transition Overlay -->
+  <div id="page-transition" class="page-transition"></div>
+
+  <!-- Ambient Mouse Glow -->
+  <div id="bg-glow-aura" class="bg-glow-aura" aria-hidden="true"></div>
+
+  <!-- Scroll Progress Bar -->
+  <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
+
+  <!-- Floating Orbs Background -->
+  <div class="floating-orbs" aria-hidden="true">
+    <div class="floating-orb"></div>
+    <div class="floating-orb"></div>
+    <div class="floating-orb"></div>
+  </div>
+
+  <!-- Film Grain Noise Overlay -->
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <!-- Custom Interactive Cursor -->
+  <div id="custom-cursor" class="custom-cursor" aria-hidden="true"></div>
+  <div id="custom-cursor-dot" class="custom-cursor-dot" aria-hidden="true"></div>
+
+  <!-- WebGL Background Canvas -->
+  <div id="canvas-container" aria-hidden="true"></div>
+
+  <!-- Grid Overlay -->
+  <div class="grid-overlay" aria-hidden="true">
+    <div class="grid-overlay-line"></div>
+    <div class="grid-overlay-line"></div>
+    <div class="grid-overlay-line"></div>
+    <div class="grid-overlay-line"></div>
+  </div>
+
+  <!-- ============================================================
+       HEADER NAVIGATION
+       ============================================================ -->
+  <header id="site-header">
+    <div class="nav-container">
+      <a href="#" class="logo-link" aria-label="Berry Loop Home">
+        <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="50" cy="50" rx="30" ry="20" transform="rotate(-15 50 50)" stroke="#F3F5F4" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="32" cy="42" r="8.5" fill="#7A1F3D" />
+          <circle cx="68" cy="58" r="8.5" fill="#9FE6B0" />
+        </svg>
+        <span>Berry Loop</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#showcase">Apps</a></li>
+          <li><a href="#philosophy">Philosophy</a></li>
+          <li><a href="#connect">Connect</a></li>
+        </ul>
+        <a href="https://play.google.com/store/apps/details?id=com.ranesh.docxpress" 
+           target="_blank" rel="noopener" class="cta-nav-btn magnetic-btn" id="nav-cta">
+          <span>Get DocXpress</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.5 9.5L9.5 2.5M9.5 2.5H4M9.5 2.5V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="mobile-menu-btn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <main>
+
+    <!-- 1. HERO SECTION -->
+    <section id="hero">
+      <div class="hero-content">
+        <div class="studio-label">Independent App Studio</div>
+        <h1 class="hero-title">
+          <span class="char-reveal-line">Small loop.</span>
+          <span class="line-2 accent gradient-text char-reveal-line">Sharp apps.</span>
+        </h1>
+        <p class="hero-tagline">We construct single-purpose, offline-first mobile tools. Zero servers, zero trackers. Designed with geometric discipline.</p>
+        <div class="hero-cta-group">
+          <a href="#showcase" class="hero-btn-primary magnetic-btn">
+            <span>Explore Our Apps</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#philosophy" class="hero-btn-secondary magnetic-btn">Our Philosophy</a>
+        </div>
+      </div>
+
+      <!-- Fallback SVG -->
+      <div class="fallback-centerpiece" aria-hidden="true">
+        <svg class="fallback-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse class="fb-vine" cx="60" cy="60" rx="36" ry="24" transform="rotate(-15 60 60)" stroke="#1f3d2b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle class="fb-berry-1" cx="38" cy="50" r="14" />
+          <circle class="fb-berry-2" cx="82" cy="70" r="14" />
+        </svg>
+      </div>
+
+      <a href="#showcase" class="scroll-cue" aria-label="Scroll to Apps Showcase">
+        <span>Scroll to explore</span>
+        <div class="scroll-cue-indicator"></div>
+      </a>
+    </section>
+
+    <!-- 2. APP SHOWCASE (HORIZONTAL SCROLL) -->
+    <div id="showcase-pin-wrapper">
+      <section id="showcase">
+        <div class="showcase-header">
+          <h2>App Showcase</h2>
+          <p>A look into our active releases and upcoming work. Driven by performance and on-device logic.</p>
+        </div>
+
+        <div class="horizontal-scroll-section">
+          <div class="horizontal-scroll-track" id="scroll-track">
+          <!-- Card 1: DocXpress -->
+          <div class="app-showcase-card" id="app-docxpress">
+            <div class="app-visual-wrapper">
+              <img src="docxpress_icon.png" class="app-fallback-icon" alt="DocXpress Icon">
+              <canvas class="card-canvas" id="canvas-docxpress" aria-label="3D DocXpress Icon"></canvas>
+            </div>
+            <div class="app-info">
+              <span class="app-badge live">Live on Play Store</span>
+              <div class="app-title-container">
+                <div class="app-title-header">
+                  <img src="docxpress_icon.png" alt="DocXpress Icon" class="app-title-icon">
+                  <h3 class="app-title">DocXpress</h3>
+                </div>
+                <p class="app-desc">The zero-dependency document engine. Scan, translate, convert, and compress files directly on your Android device.</p>
+              </div>
+              <ul class="features-list">
+                <li><strong>Offline scanning:</strong> High-performance scanner with auto edge-detection.</li>
+                <li><strong>On-Device OCR:</strong> Extract readable text from images in 50+ languages.</li>
+                <li><strong>PDF Toolbox:</strong> Merge, split, extract, and convert PDFs instantly.</li>
+                <li><strong>Media Compression:</strong> Drastically reduce PDF, image, and video filesizes.</li>
+                <li><strong>Privacy Immutable:</strong> No servers, no tracking, no account requirements.</li>
+              </ul>
+              <div class="app-specs-grid">
+                <div class="spec-item"><span class="spec-label">Engine size</span><span class="spec-value">4.2 MB (Zero Cloud)</span></div>
+                <div class="spec-item"><span class="spec-label">OCR Mode</span><span class="spec-value">On-Device (50+ Langs)</span></div>
+                <div class="spec-item"><span class="spec-label">Min API</span><span class="spec-value">Android 8.0 (SDK 26)</span></div>
+                <div class="spec-item"><span class="spec-label">Security</span><span class="spec-value">Immutable Local Sandbox</span></div>
+              </div>
+              <div class="app-cta-group">
+                <a href="https://play.google.com/store/apps/details?id=com.ranesh.docxpress" target="_blank" rel="noopener" class="play-store-btn magnetic-btn" id="play-store-docxpress">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/></svg>
+                  <span>Get on Google Play</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Flow Finance -->
+          <div class="app-showcase-card" id="app-flowfinance">
+            <div class="app-visual-wrapper">
+              <img src="flowfinance_icon.jpg" class="app-fallback-icon" alt="Flow Finance Icon">
+              <canvas class="card-canvas" id="canvas-flowfinance" aria-label="3D Flow Finance Icon"></canvas>
+            </div>
+            <div class="app-info">
+              <span class="app-badge soon">Coming Soon</span>
+              <div class="app-title-container">
+                <div class="app-title-header">
+                  <img src="flowfinance_icon.jpg" alt="Flow Finance Icon" class="app-title-icon">
+                  <h3 class="app-title">Flow Finance</h3>
+                </div>
+                <p class="app-desc">Offline-first personal finance that respects your attention. An engine built for absolute clarity over budgets and savings.</p>
+              </div>
+              <ul class="features-list">
+                <li><strong>Cupertino UI:</strong> Native, spring-loaded interfaces built for rapid data logging.</li>
+                <li><strong>Secure Bank Sync:</strong> Localized UPI/SMS reading. No server scraping.</li>
+                <li><strong>Smart Rules:</strong> Auto-categorize recurring charges with custom regex rules.</li>
+                <li><strong>Anomaly Detection:</strong> On-device algorithms flag subscriptions or spikes.</li>
+                <li><strong>Fully Bilingual:</strong> Complete, native support for Tamil and English.</li>
+              </ul>
+              <div class="app-specs-grid">
+                <div class="spec-item"><span class="spec-label">UI Toolkit</span><span class="spec-value">Cupertino Native (60fps)</span></div>
+                <div class="spec-item"><span class="spec-label">Sync Protocol</span><span class="spec-value">Local UPI/SMS Scrape</span></div>
+                <div class="spec-item"><span class="spec-label">Database</span><span class="spec-value">AES-256 encrypted SQLite</span></div>
+                <div class="spec-item"><span class="spec-label">AI Engine</span><span class="spec-value">Local regression anomalies</span></div>
+              </div>
+              <div class="app-cta-group">
+                <form class="notify-form" novalidate>
+                  <input type="email" class="notify-input" placeholder="Email for beta access" required aria-label="Email for Flow Finance beta">
+                  <button type="submit" class="notify-btn">Notify Me</button>
+                </form>
+                <div class="form-message" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Memora -->
+          <div class="app-showcase-card" id="app-memora">
+            <div class="app-visual-wrapper">
+              <img src="memora_icon.png" class="app-fallback-icon" alt="Memora Icon">
+              <canvas class="card-canvas" id="canvas-memora" aria-label="3D Memora Icon"></canvas>
+            </div>
+            <div class="app-info">
+              <span class="app-badge soon">Coming Soon</span>
+              <div class="app-title-container">
+                <div class="app-title-header">
+                  <img src="memora_icon.png" alt="Memora Icon" class="app-title-icon">
+                  <h3 class="app-title">Memora</h3>
+                </div>
+                <p class="app-desc">A vintage-themed digital scrapbook app built entirely in Flutter. Drag, resize, and rotate Polaroid photos, handwritten sticky notes, and analog stickers on a virtual canvas—no cloud required.</p>
+              </div>
+              <ul class="features-list">
+                <li><strong>Tactile Canvas:</strong> Drag, resize, and rotate notes and photos freely in real-time.</li>
+                <li><strong>Vintage Themes:</strong> Choose between Cork, Felt, or classic Photo Album backings.</li>
+                <li><strong>Polaroid Styling:</strong> Auto-generates Polaroid cards with warm-tinted physical shadows.</li>
+                <li><strong>Handwritten Fonts:</strong> Write sticky notes styled dynamically with handwriting scripts.</li>
+                <li><strong>Local Sandbox:</strong> Your scrapbooks are stored entirely locally, offline-first.</li>
+              </ul>
+              <div class="app-specs-grid">
+                <div class="spec-item"><span class="spec-label">Framework</span><span class="spec-value">Flutter 3.x (iOS & Android)</span></div>
+                <div class="spec-item"><span class="spec-label">Persistence</span><span class="spec-value">Local JSON + SharedPreferences</span></div>
+                <div class="spec-item"><span class="spec-label">Export</span><span class="spec-value">PNG Screen Capture / Vector PDF</span></div>
+                <div class="spec-item"><span class="spec-label">Visual</span><span class="spec-value">Paper Noise / Typewriter Fonts</span></div>
+              </div>
+              <div class="app-cta-group">
+                <form class="notify-form" novalidate>
+                  <input type="email" class="notify-input" placeholder="Email for Memora beta" required aria-label="Email for Memora beta">
+                  <button type="submit" class="notify-btn">Notify Me</button>
+                </form>
+                <div class="form-message" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Flutter Puzzle -->
+          <div class="app-showcase-card" id="app-puzzle">
+            <div class="app-visual-wrapper">
+              <img src="puzzle_icon.png" class="app-fallback-icon" alt="Flutter Puzzle Icon">
+              <canvas class="card-canvas" id="canvas-puzzle" aria-label="3D Flutter Puzzle Icon"></canvas>
+            </div>
+            <div class="app-info">
+              <span class="app-badge soon">In Development</span>
+              <div class="app-title-container">
+                <div class="app-title-header">
+                  <img src="puzzle_icon.png" alt="Flutter Puzzle Icon" class="app-title-icon">
+                  <h3 class="app-title">Flutter Puzzle</h3>
+                </div>
+                <p class="app-desc">A multiplayer slide puzzle featuring real-time battles, custom photo puzzles, and an auto-solver using the A* pathfinding algorithm.</p>
+              </div>
+              <ul class="features-list">
+                <li><strong>3 Game Modes:</strong> Classic slide board, custom image puzzle, and multiplayer matches.</li>
+                <li><strong>A* Auto-Solver:</strong> Built-in pathfinding algorithm solves any configuration in minimum moves.</li>
+                <li><strong>Real-time Battles:</strong> Competitive head-to-head multiplayer powered by Firestore.</li>
+                <li><strong>Adaptive Theme:</strong> Automatically creates a vibrant color palette based on your image.</li>
+                <li><strong>Rive Animation:</strong> Beautiful interactive Dash mascot responding to your puzzle progress.</li>
+              </ul>
+              <div class="app-specs-grid">
+                <div class="spec-item"><span class="spec-label">State Tool</span><span class="spec-value">Riverpod State Management</span></div>
+                <div class="spec-item"><span class="spec-label">Backend Sync</span><span class="spec-value">Firebase Auth & Firestore</span></div>
+                <div class="spec-item"><span class="spec-label">Pathfinding</span><span class="spec-value">A* Optimal Moves Solver</span></div>
+                <div class="spec-item"><span class="spec-label">Animation</span><span class="spec-value">Rive 2D Vector Canvas</span></div>
+              </div>
+              <div class="app-cta-group">
+                <form class="notify-form" novalidate>
+                  <input type="email" class="notify-input" placeholder="Email for Puzzle beta" required aria-label="Email for Puzzle beta">
+                  <button type="submit" class="notify-btn">Notify Me</button>
+                </form>
+                <div class="form-message" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <!-- MARQUEE TICKER -->
+    <div class="marquee-section" aria-label="Scrolling highlights">
+      <div class="marquee-track">
+        <div class="marquee-item"><span class="marquee-dot"></span>Offline-First Architecture</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>Zero Cloud Dependencies</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>Privacy by Design</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>50+ Language OCR</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>AES-256 Encryption</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>Hardware Accelerated</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>Flutter & Kotlin</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>No Subscriptions</div>
+        <!-- Duplicate for seamless loop -->
+        <div class="marquee-item"><span class="marquee-dot"></span>Offline-First Architecture</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>Zero Cloud Dependencies</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>Privacy by Design</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>50+ Language OCR</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>AES-256 Encryption</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>Hardware Accelerated</div>
+        <div class="marquee-item"><span class="marquee-dot"></span>Flutter & Kotlin</div>
+        <div class="marquee-item"><span class="marquee-dot mint"></span>No Subscriptions</div>
+      </div>
+    </div>
+
+    <!-- SECTION DIVIDER 1 -->
+    <div class="section-divider reveal-element" aria-hidden="true">
+      <div class="section-divider-gradient"></div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- 3. FEATURES HUB -->
+    <section id="docs-hub">
+      <div class="docs-header reveal-element">
+        <h2>App Features &amp; Insights</h2>
+        <p>Explore the key features, interactive highlights, and offline-first advantages of our applications.</p>
+      </div>
+
+      <div class="docs-card-wrapper">
+        <div class="docs-tabs-nav" role="tablist">
+          <button class="docs-tab-btn active" id="tab-flow-btn" role="tab" aria-selected="true" aria-controls="panel-flow">
+            <img src="flowfinance_icon.jpg" alt="" class="tab-btn-icon"><span>Flow Finance</span>
+          </button>
+          <button class="docs-tab-btn" id="tab-docx-btn" role="tab" aria-selected="false" aria-controls="panel-docx">
+            <img src="docxpress_icon.png" alt="" class="tab-btn-icon"><span>DocXpress</span>
+          </button>
+          <button class="docs-tab-btn" id="tab-memora-btn" role="tab" aria-selected="false" aria-controls="panel-memora">
+            <img src="memora_icon.png" alt="" class="tab-btn-icon"><span>Memora</span>
+          </button>
+          <button class="docs-tab-btn" id="tab-puzzle-btn" role="tab" aria-selected="false" aria-controls="panel-puzzle">
+            <img src="puzzle_icon.png" alt="" class="tab-btn-icon"><span>Flutter Puzzle</span>
+          </button>
+        </div>
+
+        <div class="docs-tabs-content">
+          <!-- Panel 1: Flow Finance -->
+          <div class="docs-tab-panel active" id="panel-flow" role="tabpanel" aria-labelledby="tab-flow-btn">
+            <div class="panel-grid">
+              <div class="panel-column-left">
+                <h4>Core Features &amp; Capabilities</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Feature</th><th>What it Does</th></tr></thead><tbody>
+                    <tr><td><strong>On-Device Auto SMS Sync</strong></td><td>Reads local UPI and bank transaction alerts to categorize spending automatically. Zero cloud logging.</td></tr>
+                    <tr><td><strong>Biometric Sandbox Lock</strong></td><td>Protects your financial logs using native device fingerprint or facial recognition.</td></tr>
+                    <tr><td><strong>Smart Category Regex</strong></td><td>Automatically categorizes recurring charges based on custom search rules you set.</td></tr>
+                    <tr><td><strong>Bilingual Localization</strong></td><td>Full, native support for English and Tamil interfaces built for instant switching.</td></tr>
+                  </tbody></table>
+                </div>
+                <h4>Special Advantages</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Capability</th><th>Why it's Special</th></tr></thead><tbody>
+                    <tr><td><strong>AES-256 Encryption</strong></td><td>On-device database is fully encrypted with hardware-locked military keys.</td></tr>
+                    <tr><td><strong>Zero Server Sync</strong></td><td>Your budget metrics never leave your device. No cloud storage, no account logins.</td></tr>
+                    <tr><td><strong>Constant 60 FPS UI</strong></td><td>Built with native Cupertino springs for ultra-responsive micro-animations.</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+              <div class="panel-column-right">
+                <h4>Interactive Highlights</h4>
+                <div class="interactive-highlights">
+                  <p>Explore the Webpage Interaction:</p>
+                  <ul class="highlights-list">
+                    <li><span class="arrow">→</span> <strong>Berry the Mascot</strong>: Look in the bottom-right corner! Berry blinks, squashes/stretches when clicked, and his eyes follow your cursor.</li>
+                    <li><span class="arrow">→</span> <strong>3D Green & Gold Toy</strong>: Hover over the Flow Finance card to watch the golden coin stack spin and the emerald card float!</li>
+                    <li><span class="arrow">→</span> <strong>Theme Switcher</strong>: Click the theme switcher in the bottom-left corner to choose between 4 visual themes.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: DocXpress -->
+          <div class="docs-tab-panel" id="panel-docx" role="tabpanel" aria-labelledby="tab-docx-btn">
+            <div class="panel-grid">
+              <div class="panel-column-left">
+                <h4>Core Features &amp; Capabilities</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Feature</th><th>What it Does</th></tr></thead><tbody>
+                    <tr><td><strong>Edge-Detection Scanner</strong></td><td>Automatically isolates document boundaries, corrects perspective, and enhances shadows.</td></tr>
+                    <tr><td><strong>On-Device OCR Engine</strong></td><td>Extracts text from images offline in 50+ languages with zero external dependencies.</td></tr>
+                    <tr><td><strong>Multi-Page PDF Editor</strong></td><td>Reorder pages, merge multiple documents, or split files in a drag-and-drop workspace.</td></tr>
+                    <tr><td><strong>High-Ratio Compression</strong></td><td>Compresses large PDF, video, and image sizes by up to 80% with real-time preview.</td></tr>
+                  </tbody></table>
+                </div>
+                <h4>Special Advantages</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Capability</th><th>Why it's Special</th></tr></thead><tbody>
+                    <tr><td><strong>4.2 MB Engine Size</strong></td><td>Ultra-compact install size with full document workflows built directly into the local application.</td></tr>
+                    <tr><td><strong>Zero Trackers & Accounts</strong></td><td>No cloud accounts, no marketing pixels, and no data tracking. Fully sandbox isolated.</td></tr>
+                    <tr><td><strong>Hardware-Accelerated Encoding</strong></td><td>Uses local hardware blocks to encode and compress files at maximum speed.</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+              <div class="panel-column-right">
+                <h4>Interactive Highlights</h4>
+                <div class="interactive-highlights">
+                  <p>Explore the Webpage Interaction:</p>
+                  <ul class="highlights-list">
+                    <li><span class="arrow">→</span> <strong>3D Purple Logo Toy</strong>: Hover over the DocXpress card to see the interlocking purple rings spin and the neon laser scan!</li>
+                    <li><span class="arrow">→</span> <strong>Interactive Specs</strong>: Explore the tech grids on each showcase card for detailed specifications.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3: Memora -->
+          <div class="docs-tab-panel" id="panel-memora" role="tabpanel" aria-labelledby="tab-memora-btn">
+            <div class="panel-grid">
+              <div class="panel-column-left">
+                <h4>Core Features &amp; Capabilities</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Feature</th><th>What it Does</th></tr></thead><tbody>
+                    <tr><td><strong>Vintage Scrapbook Boards</strong></td><td>Create Cork, Felt, or Photo Album boards with unique background rendering and styling.</td></tr>
+                    <tr><td><strong>Tactile Canvas Engine</strong></td><td>Freeform drag, rotate, and scale elements with bring-to-front z-index adjustments.</td></tr>
+                    <tr><td><strong>Polaroid Card Customizer</strong></td><td>Imports local photos and frames them in retro Polaroid borders with tape corners.</td></tr>
+                    <tr><td><strong>Handwritten Note Sheets</strong></td><td>Write sticky notes in Caveat script fonts with a color picker palette.</td></tr>
+                  </tbody></table>
+                </div>
+                <h4>Special Advantages</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Capability</th><th>Why it's Special</th></tr></thead><tbody>
+                    <tr><td><strong>Paper Texture Overlay</strong></td><td>Uses CustomPainter to draw a low-opacity grain paper texture overlay on every screen.</td></tr>
+                    <tr><td><strong>Local JSON DB</strong></td><td>Serializes objects and boards into raw local JSON stored securely in SharedPreferences.</td></tr>
+                    <tr><td><strong>Chronological Timeline</strong></td><td>Aggregates and displays all memories chronologically, providing a journaling feed.</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+              <div class="panel-column-right">
+                <h4>Interactive Highlights</h4>
+                <div class="interactive-highlights">
+                  <p>Explore the Webpage Interaction:</p>
+                  <ul class="highlights-list">
+                    <li><span class="arrow">→</span> <strong>3D Scrapbook Toy</strong>: Hover over the Memora card to see the Polaroid float, the board sway, and the gold star spin!</li>
+                    <li><span class="arrow">→</span> <strong>Spring-Loaded Titles</strong>: Hover over any card to watch the app icon scale and tilt dynamically.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 4: Flutter Puzzle -->
+          <div class="docs-tab-panel" id="panel-puzzle" role="tabpanel" aria-labelledby="tab-puzzle-btn">
+            <div class="panel-grid">
+              <div class="panel-column-left">
+                <h4>Core Features &amp; Capabilities</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Feature</th><th>What it Does</th></tr></thead><tbody>
+                    <tr><td><strong>Multi-Mode Gameplay</strong></td><td>Play classic sliding grids, generate puzzles from uploaded photos, or battle head-to-head.</td></tr>
+                    <tr><td><strong>A* Pathfinding Solver</strong></td><td>Auto-solves any configuration using A* search heuristics in minimum steps.</td></tr>
+                    <tr><td><strong>Real-Time Sync</strong></td><td>Syncs multiplayer game boards instantly across devices using Cloud Firestore listeners.</td></tr>
+                    <tr><td><strong>Dynamic Palette Generator</strong></td><td>Scrapes colors from the uploaded photo to skin the board UI dynamically.</td></tr>
+                  </tbody></table>
+                </div>
+                <h4>Special Advantages</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Capability</th><th>Why it's Special</th></tr></thead><tbody>
+                    <tr><td><strong>Riverpod Architecture</strong></td><td>Handles complex state variables seamlessly across modes and network sync states.</td></tr>
+                    <tr><td><strong>Rive Mascots</strong></td><td>Displays an interactive Dash mascot built in Rive that reacts to player moves.</td></tr>
+                    <tr><td><strong>Firebase Integration</strong></td><td>Provides anonymous and email authentication, hosting, and Firestore out of the box.</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+              <div class="panel-column-right">
+                <h4>Interactive Highlights</h4>
+                <div class="interactive-highlights">
+                  <p>Explore the Webpage Interaction:</p>
+                  <ul class="highlights-list">
+                    <li><span class="arrow">→</span> <strong>3D Sliding Grid Toy</strong>: Hover over the Flutter Puzzle card to watch the puzzle board float and cyan/orange tiles slide!</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER 2 -->
+    <div class="section-divider reveal-element" aria-hidden="true">
+      <div class="section-divider-gradient"></div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- 3.5 STATS COUNTER SECTION -->
+    <section id="stats">
+      <div class="stats-header reveal-element">
+        <h2>By the Numbers</h2>
+        <p>Key metrics from our engineering journey building offline-first Android tools.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card glow-border-card">
+          <svg class="stat-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="6" width="32" height="36" rx="3"/><line x1="16" y1="16" x2="32" y2="16"/><line x1="16" y1="22" x2="32" y2="22"/><line x1="16" y1="28" x2="26" y2="28"/></svg>
+          <div class="stat-number" data-target="4" data-suffix="">0</div>
+          <div class="stat-label">Apps in Pipeline</div>
+          <div class="stat-detail">DocXpress • Flow Finance • Memora • Flutter Puzzle</div>
+        </div>
+        <div class="stat-card glow-border-card">
+          <svg class="stat-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="24" cy="24" r="18"/><polyline points="24 12 24 24 32 28"/></svg>
+          <div class="stat-number" data-target="50" data-suffix="+">0</div>
+          <div class="stat-label">OCR Languages</div>
+          <div class="stat-detail">On-device text extraction across scripts worldwide</div>
+        </div>
+        <div class="stat-card glow-border-card">
+          <svg class="stat-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M24 6L30 18 44 20 34 30 36 44 24 38 12 44 14 30 4 20 18 18z"/></svg>
+          <div class="stat-number" data-target="100" data-suffix="%">0</div>
+          <div class="stat-label">Local Execution</div>
+          <div class="stat-detail">All ML models run directly on your hardware</div>
+        </div>
+        <div class="stat-card glow-border-card">
+          <svg class="stat-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 42V20L24 6l14 14v22"/><rect x="18" y="28" width="12" height="14"/></svg>
+          <div class="stat-number" data-target="0" data-suffix="">0</div>
+          <div class="stat-label">Servers Used</div>
+          <div class="stat-detail">100% on-device processing, zero cloud dependency</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DIVIDER 3 -->
+    <div class="section-divider reveal-element" aria-hidden="true">
+      <div class="section-divider-gradient"></div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- 3.7 PROCESS TIMELINE -->
+    <section id="process">
+      <div class="process-header reveal-element">
+        <h2>Our Design Process</h2>
+        <p>How we approach building every Berry Loop application — from concept to release.</p>
+      </div>
+      <div class="process-timeline">
+        <div class="process-step">
+          <div class="process-step-content">
+            <h4>Identify the Gap</h4>
+            <p>We look for common pain points where existing solutions are overbuilt, cloud-dependent, or riddled with ads and trackers. If we can solve it locally — we build it.</p>
+          </div>
+          <div class="process-step-number">01</div>
+          <div class="process-step-spacer"></div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-spacer"></div>
+          <div class="process-step-number">02</div>
+          <div class="process-step-content">
+            <h4>Architect Offline-First</h4>
+            <p>Every feature is designed to function without internet. We use local databases, on-device ML, and hardware-accelerated encoding to ensure zero dependency on remote servers.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-content">
+            <h4>Design with Discipline</h4>
+            <p>We apply geometric design principles — clean typography, purposeful whitespace, and spring-loaded micro-interactions. Every pixel serves a function.</p>
+          </div>
+          <div class="process-step-number">03</div>
+          <div class="process-step-spacer"></div>
+        </div>
+        <div class="process-step">
+          <div class="process-step-spacer"></div>
+          <div class="process-step-number">04</div>
+          <div class="process-step-content">
+            <h4>Ship & Iterate</h4>
+            <p>We release lean, focused builds on the Play Store. Then iterate based on crash-free metrics, performance profiling, and real user feedback — not data harvesting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PHILOSOPHY SECTION -->
+    <section id="philosophy">
+      <div class="phil-container reveal-element">
+        <svg class="phil-icon-loop" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="50" cy="50" rx="30" ry="20" transform="rotate(-15 50 50)" stroke="currentColor" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+        <h2 class="phil-title">Offline-first.<br><span class="accent">No trackers. No noise.</span></h2>
+        <p class="phil-body">
+          We believe that utilities should be utility-focused, not data farms. All computing runs <strong>locally on your hardware</strong>. No accounts, no subscriptions, and no internet required. Your tools load instantly, run infinitely, and keep your data where it belongs: <strong>with you</strong>.
+        </p>
+
+        <div class="phil-cards">
+          <div class="phil-card">
+            <svg class="phil-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="12" width="32" height="24" rx="3"/><line x1="24" y1="36" x2="24" y2="42"/><line x1="16" y1="42" x2="32" y2="42"/><circle cx="24" cy="24" r="4"/><path d="M20 20l-4-4M28 20l4-4M20 28l-4 4M28 28l4 4"/></svg>
+            <h4>Zero Servers</h4>
+            <p>Every computation happens on your local device. No remote servers, no cloud dependency.</p>
+          </div>
+          <div class="phil-card">
+            <svg class="phil-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="10" y="6" width="28" height="36" rx="3"/><circle cx="24" cy="20" r="6"/><path d="M16 32c0-4.418 3.582-8 8-8s8 3.582 8 8"/><line x1="24" y1="38" x2="24" y2="38"/></svg>
+            <h4>Privacy First</h4>
+            <p>No accounts, no trackers, no analytics pixels. Your data stays encrypted and local.</p>
+          </div>
+          <div class="phil-card">
+            <svg class="phil-card-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8h24v32H12z"/><path d="M18 16h12M18 22h12M18 28h8"/><circle cx="36" cy="36" r="8" fill="none"/><path d="M33 36l2 2 4-4"/></svg>
+            <h4>Local Computing</h4>
+            <p>Hardware-accelerated processing using your device's full capabilities, offline and instant.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. FOOTER -->
+    <footer id="connect">
+      <div class="footer-top reveal-element">
+        <div class="footer-brand">
+          <a href="#" class="logo-link" aria-label="Berry Loop Home">
+            <svg class="logo-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="50" cy="50" rx="30" ry="20" transform="rotate(-15 50 50)" stroke="#F3F5F4" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="32" cy="42" r="8.5" fill="#7A1F3D" />
+              <circle cx="68" cy="58" r="8.5" fill="#9FE6B0" />
+            </svg>
+            <span>Berry Loop</span>
+          </a>
+          <p>Handcrafting sharp, responsive, and privacy-first Android applications from our indie studio.</p>
+        </div>
+
+        <div class="footer-connect">
+          <h3 class="footer-heading">Initiate Contact</h3>
+          <a href="mailto:berryloopofficial@gmail.com" class="contact-email-link magnetic-btn" id="email-link">
+            berryloopofficial@gmail.com
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-bottom reveal-element">
+        <div class="copyright">
+          &copy; <span id="current-year">2026</span> Berry Loop Studio. All rights reserved.
+        </div>
+        <div class="footer-badges">
+          <a href="https://play.google.com/store/apps/details?id=com.ranesh.docxpress" target="_blank" rel="noopener" class="play-store-badge" aria-label="DocXpress on Google Play Store">
+            <svg width="135" height="40" viewBox="0 0 135 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="135" height="40" rx="6" fill="black" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="38" y="16" fill="#8A928E" font-family="'Inter', sans-serif" font-size="7" font-weight="600" letter-spacing="0.05em">GET IT ON</text>
+              <text x="38" y="28" fill="#F3F5F4" font-family="'Space Grotesk', sans-serif" font-size="12" font-weight="700">Google Play</text>
+              <g transform="translate(10, 8) scale(0.9)">
+                <path d="M1.38 0.9C1.09 1.19 0.9 1.62 0.9 2.21V33.79C0.9 34.38 1.09 34.81 1.38 35.1L19.47 17.25V16.75L1.38 0.9Z" fill="url(#gp0)"/>
+                <path d="M25.44 23.24L19.47 17.27V16.73L25.44 12.76L25.56 12.66C26.98 13.48 27.94 14.97 27.94 16.75C27.94 18.53 26.98 20.02 25.56 20.84L25.44 23.24Z" fill="url(#gp1)"/>
+                <path d="M25.44 12.76L5.62 1.49C4.85 1.05 3.99 1.05 3.23 1.49L19.47 17.73L25.44 12.76Z" fill="url(#gp2)"/>
+                <path d="M25.44 25.24L19.47 20.27L3.23 36.51C3.99 36.95 4.85 36.95 5.62 36.51L25.44 25.24Z" fill="url(#gp3)"/>
+              </g>
+              <defs>
+                <linearGradient id="gp0" x1="16.5" y1="33.3" x2="3.15" y2="1.96" gradientUnits="userSpaceOnUse"><stop stop-color="#00A0FF"/><stop offset="1" stop-color="#00E4FF"/></linearGradient>
+                <linearGradient id="gp1" x1="29.1" y1="18" x2="10.9" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#FF3A44"/><stop offset="1" stop-color="#FFC400"/></linearGradient>
+                <linearGradient id="gp2" x1="5.2" y1="11.5" x2="25.2" y2="11.5" gradientUnits="userSpaceOnUse"><stop stop-color="#3bcc6f"/><stop offset="1" stop-color="#21a052"/></linearGradient>
+                <linearGradient id="gp3" x1="25.2" y1="24.5" x2="5.2" y2="24.5" gradientUnits="userSpaceOnUse"><stop stop-color="#FF3A44"/><stop offset="1" stop-color="#E10058"/></linearGradient>
+              </defs>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ============================================================
+       FLOATING ELEMENTS
+       ============================================================ -->
+
+  <!-- Mobile Drawer Menu -->
+  <div id="mobile-drawer-overlay" class="mobile-drawer-overlay"></div>
+  <div id="mobile-drawer" class="mobile-drawer">
+    <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Close menu">&times;</button>
+    <ul class="mobile-nav-list">
+      <li><a href="#showcase" class="mobile-nav-link">Apps</a></li>
+      <li><a href="#docs-hub" class="mobile-nav-link">Features</a></li>
+      <li><a href="#stats" class="mobile-nav-link">Stats</a></li>
+      <li><a href="#philosophy" class="mobile-nav-link">Philosophy</a></li>
+      <li><a href="#connect" class="mobile-nav-link">Connect</a></li>
+    </ul>
+    <div class="mobile-drawer-footer">
+      <p>Berry Loop Studio &mdash; Privacy-first Android tools built with geometric discipline.</p>
+    </div>
+  </div>
+
+  <!-- Theme Switcher -->
+  <div id="theme-switcher-container">
+    <button id="theme-toggle-btn" aria-label="Switch Background Theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        <circle cx="12" cy="12" r="4"/>
+      </svg>
+    </button>
+    <div id="theme-menu" role="menu">
+      <button class="theme-option active" data-theme="aura" role="menuitem">Studio Aura</button>
+      <button class="theme-option" data-theme="warm" role="menuitem">Warm Editorial</button>
+      <button class="theme-option" data-theme="minimal" role="menuitem">Graphite Minimal</button>
+      <button class="theme-option" data-theme="forest" role="menuitem">Glassmorphic Forest</button>
+    </div>
+  </div>
+
+  <!-- Berry Mascot -->
+  <div id="mascot-container">
+    <div id="mascot-speech" role="status" aria-live="polite">
+      <button class="speech-close-btn" id="speech-close" aria-label="Close speech bubble">&times;</button>
+      <div class="speech-text" id="speech-text-content">
+        Hey! I'm <strong>Berry</strong>. Click me for some developer stats or app insights!
+      </div>
+    </div>
+    <div id="mascot-berry" aria-label="Berry Mascot (Click to interact)">
+      <div class="mascot-leaf"></div>
+      <svg class="mascot-face" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse class="mascot-eye-lid" cx="32" cy="45" rx="9" ry="14" fill="#F3F5F4" />
+        <ellipse class="mascot-eye-lid" cx="68" cy="45" rx="9" ry="14" fill="#F3F5F4" />
+        <circle class="mascot-pupil" id="pupil-left" cx="32" cy="45" r="5" />
+        <circle class="mascot-pupil" id="pupil-right" cx="68" cy="45" r="5" />
+        <path class="mascot-mouth" id="mascot-mouth-path" d="M 40 62 Q 50 72 60 62" />
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  
+  <script>
+    /* ============================================================
+       1. PRELOADER SYSTEM
+       ============================================================ */
+    gsap.registerPlugin(ScrollTrigger);
+
+    const preloader = document.getElementById('preloader');
+    const preloaderCounter = document.getElementById('preloader-counter');
+    const preloaderBar = document.getElementById('preloader-bar');
+    let loadProgress = 0;
+
+    function animatePreloader() {
+      const interval = setInterval(() => {
+        loadProgress += Math.random() * 8 + 2;
+        if (loadProgress >= 100) {
+          loadProgress = 100;
+          clearInterval(interval);
+          preloaderCounter.textContent = '100';
+          preloaderBar.style.width = '100%';
+          setTimeout(revealSite, 400);
+        } else {
+          preloaderCounter.textContent = Math.floor(loadProgress);
+          preloaderBar.style.width = loadProgress + '%';
+        }
+      }, 80);
+    }
+
+    function revealSite() {
+      preloader.classList.add('revealing');
+      
+      // Animate the radial mask reveal
+      let radius = 0;
+      const revealAnim = setInterval(() => {
+        radius += 2.5;
+        preloader.style.setProperty('--reveal-radius', radius + 'vmax');
+        if (radius >= 150) {
+          clearInterval(revealAnim);
+          preloader.style.opacity = '0';
+          setTimeout(() => {
+            preloader.remove();
+            triggerHeroEntrance();
+          }, 500);
+        }
+      }, 16);
+    }
+
+    function triggerHeroEntrance() {
+      // Reveal studio label
+      const studioLabel = document.querySelector('.studio-label');
+      if (studioLabel) {
+        studioLabel.style.opacity = '1';
+        studioLabel.style.transform = 'translateY(0)';
+      }
+
+      // Char-by-char reveal for hero title
+      const charLines = document.querySelectorAll('.char-reveal-line');
+      charLines.forEach((line, lineIdx) => {
+        const text = line.textContent;
+        line.textContent = '';
+        [...text].forEach((char, i) => {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.textContent = char === ' ' ? '\u00A0' : char;
+          line.appendChild(span);
+          setTimeout(() => {
+            span.classList.add('revealed');
+          }, lineIdx * 300 + i * 50 + 200);
+        });
+      });
+
+      // Reveal tagline and CTA group
+      setTimeout(() => {
+        const tagline = document.querySelector('.hero-tagline');
+        const ctaGroup = document.querySelector('.hero-cta-group');
+        const scrollCue = document.querySelector('.scroll-cue');
+        if (tagline) { tagline.style.opacity = '1'; tagline.style.transform = 'translateY(0)'; }
+        setTimeout(() => {
+          if (ctaGroup) { ctaGroup.style.opacity = '1'; ctaGroup.style.transform = 'translateY(0)'; }
+        }, 200);
+        setTimeout(() => {
+          if (scrollCue) { scrollCue.style.opacity = '1'; }
+        }, 600);
+      }, 800);
+
+      // Show cursor
+      setTimeout(() => {
+        document.getElementById('custom-cursor').classList.add('visible');
+        document.getElementById('custom-cursor-dot').classList.add('visible');
+      }, 500);
+    }
+
+    // Start preloader
+    window.addEventListener('load', animatePreloader);
+
+    /* ============================================================
+       2. SCROLL PROGRESS BAR
+       ============================================================ */
+    const scrollProgressEl = document.getElementById('scroll-progress');
+    function updateScrollProgress() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      scrollProgressEl.style.width = progress + '%';
+      requestAnimationFrame(updateScrollProgress);
+    }
+    requestAnimationFrame(updateScrollProgress);
+
+    /* ============================================================
+       3. WEBGL CHECK & GLOBALS
+       ============================================================ */
+    function checkWebGL() {
+      try {
+        const canvas = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch (e) { return false; }
+    }
+
+    const hasWebGL = checkWebGL();
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!hasWebGL || prefersReducedMotion) {
+      document.body.classList.add('no-webgl');
+    }
+
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    const mouse = { x: 0, y: 0 };
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    /* ============================================================
+       4. HEADER HIDE ON SCROLL
+       ============================================================ */
+    let lastScrollY = 0;
+    const siteHeader = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+      const currentY = window.pageYOffset;
+      if (currentY > lastScrollY && currentY > 100) {
+        siteHeader.classList.add('hidden');
+      } else {
+        siteHeader.classList.remove('hidden');
+      }
+      lastScrollY = currentY;
+    }, { passive: true });
+
+    /* ============================================================
+       5. THREE.JS MAIN CENTERPIECE SCENE
+       ============================================================ */
+    let mainApp = null;
+
+    if (hasWebGL && !prefersReducedMotion) {
+
+      class InfinityVineCurve extends THREE.Curve {
+        constructor(scale = 2.4) {
+          super();
+          this.scale = scale;
+        }
+        getPoint(t, optionalTarget = new THREE.Vector3()) {
+          const angle = t * 2 * Math.PI;
+          const denom = 1 + Math.sin(angle) * Math.sin(angle);
+          const x = (this.scale * Math.cos(angle)) / denom;
+          const y = (this.scale * Math.sin(angle) * Math.cos(angle)) / denom;
+          return optionalTarget.set(x, y, 0);
+        }
+      }
+
+      class MainWebGLScene {
+        constructor() {
+          this.container = document.getElementById('canvas-container');
+          this.scene = new THREE.Scene();
+          this.scene.fog = new THREE.FogExp2(0x0B0E0C, 0.08);
+          this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 50);
+          this.camera.position.set(0, 2, 7.5);
+          this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+          this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          this.renderer.toneMappingExposure = 1.2;
+          this.renderer.physicallyCorrectLights = true;
+          this.container.appendChild(this.renderer.domElement);
+          this.scrollFraction = 0;
+          this.currentScrollLerp = 0;
+          this.swayTime = 0;
+          this.initLights();
+          this.buildGeometry();
+          this.bindEvents();
+          this.animate();
+        }
+
+        initLights() {
+          this.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+          this.keyLight = new THREE.DirectionalLight(0x9FE6B0, 3.5);
+          this.keyLight.position.set(5, 8, 5);
+          this.scene.add(this.keyLight);
+          this.rimLight = new THREE.DirectionalLight(0x7A1F3D, 4.0);
+          this.rimLight.position.set(-5, -4, -5);
+          this.scene.add(this.rimLight);
+          this.topSpot = new THREE.PointLight(0xffffff, 1.5, 20);
+          this.topSpot.position.set(0, 6, 2);
+          this.scene.add(this.topSpot);
+        }
+
+        buildGeometry() {
+          const path = new InfinityVineCurve(2.4);
+          const tubeGeo = new THREE.TubeGeometry(path, 100, 0.042, 16, true);
+          this.vineMat = new THREE.MeshPhysicalMaterial({
+            color: 0x0c1c13, emissive: 0x030805, roughness: 0.08, metalness: 0.95,
+            clearcoat: 1.0, clearcoatRoughness: 0.05, reflectivity: 1.0, transparent: true, opacity: 1.0
+          });
+          this.vine = new THREE.Mesh(tubeGeo, this.vineMat);
+          this.scene.add(this.vine);
+          this.berry1Pos = path.getPoint(0.0);
+          this.berry2Pos = path.getPoint(0.5);
+
+          const sphereGeo = new THREE.SphereGeometry(0.35, 32, 32);
+          this.docxBerryMat = new THREE.MeshPhysicalMaterial({
+            color: 0x7A1F3D, emissive: 0x22050e, roughness: 0.05, metalness: 0.1,
+            transmission: 0.85, ior: 1.6, thickness: 1.2, clearcoat: 1.0, clearcoatRoughness: 0.05, transparent: true, opacity: 1.0
+          });
+          this.docxBerry = new THREE.Mesh(sphereGeo, this.docxBerryMat);
+          this.docxBerry.position.copy(this.berry1Pos);
+          this.vine.add(this.docxBerry);
+          this.docxLight = new THREE.PointLight(0x7A1F3D, 5.0, 3.0);
+          this.docxBerry.add(this.docxLight);
+          const docGeo = new THREE.BoxGeometry(0.16, 0.22, 0.02);
+          this.docMat = new THREE.MeshBasicMaterial({ color: 0x9FE6B0, transparent: true, opacity: 0.65 });
+          const docSymbol = new THREE.Mesh(docGeo, this.docMat);
+          docSymbol.rotation.set(0.2, 0.4, 0.1);
+          this.docxBerry.add(docSymbol);
+
+          this.docxBeads = [];
+          const beadGeo = new THREE.SphereGeometry(0.045, 16, 16);
+          this.docxBeadMat = new THREE.MeshPhysicalMaterial({ color: 0x9FE6B0, transmission: 0.9, thickness: 0.5, roughness: 0.1, clearcoat: 1.0, transparent: true, opacity: 1.0 });
+          for (let i = 0; i < 2; i++) {
+            const bead = new THREE.Mesh(beadGeo, this.docxBeadMat);
+            this.docxBerry.add(bead);
+            this.docxBeads.push({ mesh: bead, radius: 0.45, speed: 0.012 * (i % 2 === 0 ? 1 : -1), angle: i * Math.PI });
+          }
+
+          this.flowBerryMat = new THREE.MeshPhysicalMaterial({
+            color: 0x9FE6B0, emissive: 0x0a2212, roughness: 0.05, metalness: 0.1,
+            transmission: 0.85, ior: 1.6, thickness: 1.2, clearcoat: 1.0, clearcoatRoughness: 0.05, transparent: true, opacity: 1.0
+          });
+          this.flowBerry = new THREE.Mesh(sphereGeo, this.flowBerryMat);
+          this.flowBerry.position.copy(this.berry2Pos);
+          this.vine.add(this.flowBerry);
+          this.flowLight = new THREE.PointLight(0x9FE6B0, 5.0, 3.0);
+          this.flowBerry.add(this.flowLight);
+          const ringGeo = new THREE.TorusGeometry(0.1, 0.025, 8, 24);
+          this.ringMat = new THREE.MeshBasicMaterial({ color: 0x7A1F3D, transparent: true, opacity: 0.75 });
+          const ringSymbol = new THREE.Mesh(ringGeo, this.ringMat);
+          ringSymbol.rotation.set(0.5, 0.2, 0);
+          this.flowBerry.add(ringSymbol);
+
+          this.flowBeads = [];
+          this.flowBeadMat = new THREE.MeshPhysicalMaterial({ color: 0x7A1F3D, transmission: 0.9, thickness: 0.5, roughness: 0.1, clearcoat: 1.0, transparent: true, opacity: 1.0 });
+          for (let i = 0; i < 2; i++) {
+            const bead = new THREE.Mesh(beadGeo, this.flowBeadMat);
+            this.flowBerry.add(bead);
+            this.flowBeads.push({ mesh: bead, radius: 0.45, speed: 0.012 * (i % 2 === 0 ? 1 : -1), angle: i * Math.PI });
+          }
+
+          this.particleGroup = new THREE.Group();
+          this.particles = [];
+          const colors = [0x9FE6B0, 0x7A1F3D, 0xdfb72c];
+          const pGeo = new THREE.SphereGeometry(0.06, 8, 8);
+          for (let i = 0; i < 28; i++) {
+            const pMat = new THREE.MeshBasicMaterial({ color: colors[i % colors.length], transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+            const mesh = new THREE.Mesh(pGeo, pMat);
+            this.particleGroup.add(mesh);
+            this.particles.push({ mesh, x: (Math.random()-0.5)*5, y: (Math.random()-0.5)*5, z: (Math.random()-0.5)*2-1, speed: 0.02+Math.random()*0.04, offset: new THREE.Vector3((Math.random()-0.5)*1.5,(Math.random()-0.5)*1.5,(Math.random()-0.5)*0.5) });
+          }
+          this.scene.add(this.particleGroup);
+
+          this.mouseLight1 = new THREE.PointLight(0x9FE6B0, 8.0, 7.0);
+          this.mouseLight2 = new THREE.PointLight(0x7A1F3D, 10.0, 7.0);
+          this.scene.add(this.mouseLight1);
+          this.scene.add(this.mouseLight2);
+        }
+
+        bindEvents() {
+          window.addEventListener('resize', () => this.onResize());
+          window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+          this.onScroll();
+        }
+
+        onResize() {
+          this.camera.aspect = window.innerWidth / window.innerHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        onScroll() {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const heroHeight = document.getElementById('hero')?.clientHeight || window.innerHeight;
+          this.scrollFraction = scrollTop / heroHeight;
+        }
+
+        animate() {
+          requestAnimationFrame(() => this.animate());
+          this.currentScrollLerp += (this.scrollFraction - this.currentScrollLerp) * 0.055;
+          const canvasOpacity = Math.max(0.15, 1 - (this.currentScrollLerp / 0.8));
+          this.container.style.opacity = canvasOpacity;
+          const vineOpacity = Math.max(0, 1 - (this.currentScrollLerp / 0.5));
+          if (this.vineMat) this.vineMat.opacity = vineOpacity;
+          if (this.docxBerryMat) this.docxBerryMat.opacity = vineOpacity;
+          if (this.flowBerryMat) this.flowBerryMat.opacity = vineOpacity;
+          if (this.docxBeadMat) this.docxBeadMat.opacity = vineOpacity;
+          if (this.flowBeadMat) this.flowBeadMat.opacity = vineOpacity;
+          if (this.docMat) this.docMat.opacity = 0.65 * vineOpacity;
+          if (this.ringMat) this.ringMat.opacity = 0.75 * vineOpacity;
+          this.vine.visible = vineOpacity > 0.01;
+          this.swayTime += 0.008;
+          this.vine.rotation.set(0.45 + Math.sin(this.swayTime*0.1)*0.08, Math.sin(this.swayTime*0.25)*0.4+(this.currentScrollLerp*0.3), Math.cos(this.swayTime*0.15)*0.05);
+          this.vine.position.set(Math.cos(this.swayTime*0.7)*0.08, Math.sin(this.swayTime)*0.08, Math.sin(this.swayTime*1.2)*0.05);
+
+          this.docxBeads.forEach(b => { b.angle += b.speed; b.mesh.position.set(Math.cos(b.angle)*b.radius, Math.sin(b.angle)*0.35*b.radius, Math.sin(b.angle)*b.radius); });
+          this.flowBeads.forEach(b => { b.angle += b.speed; b.mesh.position.set(Math.cos(b.angle)*b.radius, Math.sin(b.angle)*-0.35*b.radius, Math.sin(b.angle)*b.radius); });
+          if (this.docxBerry.children[1]) { this.docxBerry.children[1].rotation.y += 0.015; this.docxBerry.children[1].rotation.x += 0.005; }
+          if (this.flowBerry.children[1]) { this.flowBerry.children[1].rotation.y -= 0.01; this.flowBerry.children[1].rotation.z += 0.012; }
+
+          const isMobile = window.innerWidth < 768;
+          const shiftX = isMobile ? 0 : -1.2;
+          const targetX = shiftX + mouse.x * 3.5;
+          const targetY = mouse.y * 2.5;
+          const targetZ = 1.5 + mouse.y * 0.5;
+
+          if (this.mouseLight1) { this.mouseLight1.position.x += (targetX+0.3-this.mouseLight1.position.x)*0.15; this.mouseLight1.position.y += (targetY+0.3-this.mouseLight1.position.y)*0.15; this.mouseLight1.position.z += (targetZ+0.5-this.mouseLight1.position.z)*0.15; }
+          if (this.mouseLight2) { this.mouseLight2.position.x += (targetX-0.3-this.mouseLight2.position.x)*0.08; this.mouseLight2.position.y += (targetY-0.3-this.mouseLight2.position.y)*0.08; this.mouseLight2.position.z += (targetZ+0.5-this.mouseLight2.position.z)*0.08; }
+
+          const time = this.swayTime * 2.0;
+          this.particles.forEach((p, idx) => {
+            const wX = Math.sin(time+idx)*0.3, wY = Math.cos(time*0.8+idx)*0.3, wZ = Math.sin(time*0.5+idx)*0.2;
+            p.mesh.position.x += (targetX+p.offset.x+wX-p.mesh.position.x)*p.speed;
+            p.mesh.position.y += (targetY+p.offset.y+wY-p.mesh.position.y)*p.speed;
+            p.mesh.position.z += (targetZ+p.offset.z+wZ-p.mesh.position.z)*p.speed;
+            const scale = 0.8+Math.sin(time*2+idx)*0.3;
+            p.mesh.scale.set(scale, scale, scale);
+          });
+
+          const offset = isMobile ? 1.4 : 1.0;
+          this.camera.position.x += (shiftX+mouse.x*0.6-this.camera.position.x)*0.06;
+          this.camera.position.y += (0.8+mouse.y*0.6-this.camera.position.y)*0.06;
+          this.camera.position.z += (7.0*offset-this.camera.position.z)*0.06;
+          this.camera.lookAt(shiftX, 0, 0);
+          this.renderer.render(this.scene, this.camera);
+        }
+
+        updateThemeColors(theme) {
+          const themes = {
+            aura: { l1: 0x9FE6B0, l2: 0x7A1F3D, p: [0x9FE6B0, 0x7A1F3D, 0xdfb72c] },
+            warm: { l1: 0xdfb72c, l2: 0x7A1F3D, p: [0xdfb72c, 0xcc5a37, 0x7A1F3D] },
+            minimal: { l1: 0xffffff, l2: 0x444444, p: [0xffffff, 0x888888, 0x333333] },
+            forest: { l1: 0x9FE6B0, l2: 0x0f2d1e, p: [0x9FE6B0, 0x10b981, 0x0f2d1e] }
+          };
+          const t = themes[theme] || themes.aura;
+          if (this.mouseLight1) this.mouseLight1.color.setHex(t.l1);
+          if (this.mouseLight2) this.mouseLight2.color.setHex(t.l2);
+          this.particles.forEach((p, idx) => p.mesh.material.color.setHex(t.p[idx % t.p.length]));
+        }
+      }
+
+      mainApp = new MainWebGLScene();
+    }
+
+    /* ============================================================
+       6. CARD 3D MINI-SCENES
+       ============================================================ */
+    class Card3DScene {
+      constructor(canvasId, cardId, type) {
+        this.canvas = document.getElementById(canvasId);
+        this.card = document.getElementById(cardId);
+        this.type = type;
+        this.hoverActive = false;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10);
+        this.camera.position.set(0, 0, 3.5);
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
+        this.renderer.setSize(this.canvas.clientWidth || 300, this.canvas.clientHeight || 300);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        this.initLights();
+        this.buildMesh();
+        this.bindEvents();
+        this.animate();
+        const fallback = this.card.querySelector('.app-fallback-icon');
+        if (fallback) setTimeout(() => { fallback.style.opacity = '0'; }, 350);
+      }
+
+      initLights() {
+        this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(2, 4, 3); this.scene.add(key);
+        const fill = new THREE.DirectionalLight(this.type === 'docx' ? 0x7A1F3D : 0x9FE6B0, 1.5); fill.position.set(-2, -2, -1); this.scene.add(fill);
+      }
+
+      buildMesh() {
+        const loader = new THREE.TextureLoader();
+        this.group = new THREE.Group();
+        
+        let texPath = '';
+        if (this.type === 'docx') texPath = 'docxpress_icon.png';
+        else if (this.type === 'flow') texPath = 'flowfinance_icon.jpg';
+        else if (this.type === 'memora') texPath = 'memora_icon.png';
+        else if (this.type === 'puzzle') texPath = 'puzzle_icon.png';
+        
+        const tex = loader.load(texPath);
+        tex.encoding = THREE.sRGBEncoding;
+        
+        // Premium glass/glossy card material
+        const iconMat = new THREE.MeshPhysicalMaterial({
+          map: tex,
+          roughness: 0.12,
+          metalness: 0.1,
+          clearcoat: 1.0,
+          clearcoatRoughness: 0.05
+        });
+        
+        // Edge material (dark/glassy)
+        const edgeMat = new THREE.MeshPhysicalMaterial({
+          color: 0x111111,
+          roughness: 0.4,
+          metalness: 0.8
+        });
+
+        const mats = [edgeMat, edgeMat, edgeMat, edgeMat, iconMat, edgeMat];
+        
+        // The main icon card
+        this.iconCard = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 0.15), mats);
+        
+        // Add a subtle glowing backplate
+        const glowGeo = new THREE.PlaneGeometry(1.8, 1.8);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: this.type === 'docx' ? 0x7e22ce : (this.type === 'flow' ? 0x059669 : (this.type === 'memora' ? 0x8b5a2b : 0x06b6d4)),
+          transparent: true,
+          opacity: 0.3,
+          blending: THREE.AdditiveBlending
+        });
+        this.glow = new THREE.Mesh(glowGeo, glowMat);
+        this.glow.position.z = -0.2;
+        
+        this.group.add(this.iconCard);
+        this.group.add(this.glow);
+        this.scene.add(this.group);
+        
+        // Target rotations for mouse interaction
+        this.targetRotationX = 0;
+        this.targetRotationY = 0;
+      }
+
+      bindEvents() {
+        this.card.addEventListener('mouseenter', () => {
+          this.hoverActive = true;
+          this.glow.material.opacity = 0.6;
+        });
+        this.card.addEventListener('mouseleave', () => {
+          this.hoverActive = false;
+          this.glow.material.opacity = 0.3;
+          this.targetRotationX = 0;
+          this.targetRotationY = 0;
+        });
+        this.card.addEventListener('mousemove', (e) => {
+          const rect = this.card.getBoundingClientRect();
+          // Normalize mouse position from -1 to 1 based on card center
+          const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          
+          this.targetRotationY = x * 0.35; // Max horizontal tilt
+          this.targetRotationX = y * 0.35; // Max vertical tilt
+        });
+        const ro = new ResizeObserver(() => {
+          if (this.canvas.clientWidth > 0 && this.canvas.clientHeight > 0) {
+            this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+            this.camera.aspect = this.canvas.clientWidth / this.canvas.clientHeight;
+            this.camera.updateProjectionMatrix();
+          }
+        });
+        ro.observe(this.canvas);
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        // Smoothly interpolate current rotation to target rotation (tilt effect)
+        this.group.rotation.x += (this.targetRotationX - this.group.rotation.x) * 0.1;
+        this.group.rotation.y += (this.targetRotationY - this.group.rotation.y) * 0.1;
+        
+        // Idle floating animation
+        const t = Date.now() * 0.002;
+        this.group.position.y = Math.sin(t) * 0.06;
+        
+        // Subtle glow pulse
+        if (!this.hoverActive) {
+          this.glow.scale.setScalar(1.0 + Math.sin(t * 1.5) * 0.03);
+        } else {
+          this.glow.scale.setScalar(1.05);
+        }
+
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    if (hasWebGL && !prefersReducedMotion) {
+      new Card3DScene('canvas-docxpress', 'app-docxpress', 'docx');
+      new Card3DScene('canvas-flowfinance', 'app-flowfinance', 'flow');
+      new Card3DScene('canvas-memora', 'app-memora', 'memora');
+      new Card3DScene('canvas-puzzle', 'app-puzzle', 'puzzle');
+    }
+
+    /* ============================================================
+       7. GSAP HORIZONTAL SCROLL SHOWCASE
+       ============================================================ */
+    const scrollTrack = document.getElementById('scroll-track');
+    if (scrollTrack) {
+      const cards = scrollTrack.querySelectorAll('.app-showcase-card');
+      
+      // Calculate total scroll width robustly
+      function getScrollAmount() {
+        let cardWidth = Math.min(window.innerWidth - 128, 1200); // calc(100vw - 8rem) max 1200px
+        let totalWidth = (cardWidth * cards.length) + (48 * (cards.length - 1)) + 64; // + gaps and padding
+        let amount = totalWidth - window.innerWidth + 100;
+        let domWidth = scrollTrack.scrollWidth - window.innerWidth + 100;
+        return Math.max(amount, domWidth, window.innerWidth); // Guarantee at least 1 screen width of scroll
+      }
+
+      function updatePinWrapperHeight() {
+        const wrapper = document.getElementById('showcase-pin-wrapper');
+        if (wrapper) {
+          wrapper.style.height = `calc(100vh + ${getScrollAmount()}px)`;
+        }
+      }
+      
+      updatePinWrapperHeight();
+      window.addEventListener('resize', () => {
+        updatePinWrapperHeight();
+      });
+
+      // Intercept horizontal trackpad swipes and convert to vertical scroll
+      const showcaseWrapper = document.getElementById('showcase-pin-wrapper');
+      if (showcaseWrapper) {
+        showcaseWrapper.addEventListener('wheel', (e) => {
+          // Only override if the primary motion is horizontal
+          if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 5) {
+            e.preventDefault();
+            window.scrollBy({ top: e.deltaX * 1.5, behavior: 'auto' });
+          }
+        }, { passive: false });
+      }
+
+      gsap.to(scrollTrack, {
+        x: () => -getScrollAmount(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '#showcase-pin-wrapper',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1.2,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            // Activate cards as they enter viewport
+            cards.forEach((card, i) => {
+              const cardStart = i / cards.length;
+              const cardEnd = (i + 1) / cards.length;
+              if (self.progress >= cardStart - 0.1 && self.progress <= cardEnd + 0.1) {
+                card.classList.add('active');
+              } else {
+                card.classList.remove('active');
+              }
+            });
+          }
+        }
+      });
+
+      // Activate first card initially
+      if (cards.length > 0) cards[0].classList.add('active');
+    }
+
+    /* ============================================================
+       8. FORM LOGIC
+       ============================================================ */
+    document.querySelectorAll('.notify-form').forEach(form => {
+      const input = form.querySelector('.notify-input');
+      const formMsg = form.nextElementSibling || form.parentNode.querySelector('.form-message');
+      const btn = form.querySelector('.notify-btn');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = input.value.trim();
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (formMsg) { formMsg.className = 'form-message'; formMsg.textContent = ''; }
+        if (!email) { if (formMsg) { formMsg.classList.add('error'); formMsg.textContent = 'Please provide an email address.'; } return; }
+        if (!re.test(email)) { if (formMsg) { formMsg.classList.add('error'); formMsg.textContent = 'Please provide a valid email address.'; } return; }
+        btn.disabled = true;
+        const orig = btn.textContent;
+        btn.textContent = 'Connecting...';
+        setTimeout(() => {
+          if (formMsg) { formMsg.classList.add('success'); formMsg.textContent = 'Beta list locked. We will alert you upon release.'; }
+          input.value = '';
+          btn.disabled = false;
+          btn.textContent = orig;
+        }, 1000);
+      });
+    });
+
+    /* ============================================================
+       9. TAB SYSTEM
+       ============================================================ */
+    const tabButtons = document.querySelectorAll('.docs-tab-btn');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('active')) return;
+        const targetId = btn.getAttribute('aria-controls');
+        const targetPanel = document.getElementById(targetId);
+        const activeBtn = document.querySelector('.docs-tab-btn.active');
+        const activePanel = document.querySelector('.docs-tab-panel.active');
+        if (activeBtn) { activeBtn.classList.remove('active'); activeBtn.setAttribute('aria-selected', 'false'); }
+        if (activePanel) {
+          activePanel.classList.remove('active');
+          setTimeout(() => {
+            activePanel.style.display = 'none';
+            if (targetPanel) { targetPanel.style.display = 'block'; setTimeout(() => targetPanel.classList.add('active'), 50); }
+          }, 300);
+        } else if (targetPanel) { targetPanel.style.display = 'block'; setTimeout(() => targetPanel.classList.add('active'), 50); }
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+      });
+    });
+
+    /* ============================================================
+       10. MASCOT (BERRY)
+       ============================================================ */
+    const mascotBerry = document.getElementById('mascot-berry');
+    const mascotSpeech = document.getElementById('mascot-speech');
+    const speechTextContent = document.getElementById('speech-text-content');
+    const speechClose = document.getElementById('speech-close');
+    const pupilLeft = document.getElementById('pupil-left');
+    const pupilRight = document.getElementById('pupil-right');
+    const mouthPath = document.getElementById('mascot-mouth-path');
+
+    const berryQuotes = [
+      "Hey! I'm <strong>Berry</strong>. Did you know Flow Finance keeps SQLite fully local via Drift ORM? Zero cloud logs.",
+      "Check it out: DocXpress OCR runs completely offline! It parses <strong>50+ languages</strong> on your device.",
+      "Need to save space? DocXpress compression can shrink a 200MB video to 40MB on your local hardware.",
+      "Flow Finance integrates local <strong>biometric authentication</strong>!",
+      "My smart rules engine is client-side only. We process <strong>UPI bank SMS entries</strong> automatically.",
+      "DocXpress lets you merge, split, and extract PDF pages without uploading them to third parties.",
+      "We target Android 8.0 up to Android 14+ natively.",
+      "SQLite transactions are fully encrypted with <strong>AES-256</strong> for Flow Finance.",
+      "Flow Finance features fully localized bilingual support for both <strong>Tamil and English</strong>!",
+      "Memora is a vintage digital scrapbook made in Flutter that runs 100% offline!",
+      "Memora draws a subtle retro noise paper texture overlay using CustomPainter.",
+      "Flutter Puzzle multiplayer mode syncs real-time game states using Firestore.",
+      "Flutter Puzzle features an auto solver built on the <strong>A* pathfinding algorithm</strong>!"
+    ];
+
+    let quoteIndex = 0, speechTimer = null;
+
+    setInterval(() => {
+      document.querySelectorAll('.mascot-eye-lid').forEach(lid => {
+        lid.style.transform = 'scaleY(0.1)';
+        setTimeout(() => { lid.style.transform = 'scaleY(1)'; }, 150);
+      });
+    }, 4000);
+
+    window.addEventListener('mousemove', (e) => {
+      if (!mascotBerry) return;
+      const rect = mascotBerry.getBoundingClientRect();
+      const mx = rect.left + rect.width / 2, my = rect.top + rect.height / 2;
+      const dx = e.clientX - mx, dy = e.clientY - my, dist = Math.sqrt(dx*dx + dy*dy);
+      const maxT = 6.5;
+      let tx = 0, ty = 0;
+      if (dist > 0) { tx = (dx/dist)*Math.min(dist*0.06, maxT); ty = (dy/dist)*Math.min(dist*0.06, maxT); }
+      if (pupilLeft) pupilLeft.style.transform = `translate(${tx}px, ${ty}px)`;
+      if (pupilRight) pupilRight.style.transform = `translate(${tx}px, ${ty}px)`;
+    });
+
+    function speak(text) {
+      if (mouthPath) mouthPath.setAttribute('d', 'M 45 66 Q 50 60 55 66');
+      if (speechTextContent) speechTextContent.innerHTML = text;
+      if (mascotSpeech) mascotSpeech.classList.add('active');
+      if (speechTimer) clearTimeout(speechTimer);
+      speechTimer = setTimeout(closeSpeech, 7000);
+    }
+
+    function closeSpeech() {
+      if (mascotSpeech) mascotSpeech.classList.remove('active');
+      if (mouthPath) mouthPath.setAttribute('d', 'M 40 62 Q 50 72 60 62');
+    }
+
+    if (speechClose) speechClose.addEventListener('click', (e) => { e.stopPropagation(); closeSpeech(); });
+    if (mascotBerry) mascotBerry.addEventListener('click', () => {
+      mascotBerry.classList.remove('bounce');
+      void mascotBerry.offsetWidth;
+      mascotBerry.classList.add('bounce');
+      speak(berryQuotes[quoteIndex]);
+      quoteIndex = (quoteIndex + 1) % berryQuotes.length;
+    });
+
+    // Make sure users notice Berry
+    setTimeout(() => {
+      if (mascotBerry && !mascotSpeech.classList.contains('active')) {
+        mascotBerry.classList.add('bounce');
+        speak("Hey! I'm <strong>Berry</strong>, your studio assistant. Look around, and click me if you want some app insights!");
+      }
+    }, 4500);
+
+    let hasSpokenDocs = false;
+    window.addEventListener('scroll', () => {
+      const docsSection = document.getElementById('docs-hub');
+      if (docsSection) {
+        const rect = docsSection.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.7 && !hasSpokenDocs) {
+          hasSpokenDocs = true;
+          setTimeout(() => speak("Welcome to our <strong>App Features & Insights</strong>! Switch tabs above to compare details."), 800);
+        }
+      }
+    }, { passive: true });
+
+    /* ============================================================
+       11. THEME SWITCHER
+       ============================================================ */
+    const themeOptions = document.querySelectorAll('.theme-option');
+    const canvasContainer = document.getElementById('canvas-container');
+    const bgGlowAura = document.getElementById('bg-glow-aura');
+
+    const themeGradients = {
+      aura: { canvas: 'radial-gradient(circle at 50% 50%, rgba(122, 31, 61, 0.08) 0%, rgba(15, 230, 176, 0.03) 60%, #0B0E0C 100%)', glow: 'radial-gradient(circle, rgba(159, 230, 176, 0.16) 0%, rgba(122, 31, 61, 0.14) 45%, transparent 70%)' },
+      warm: { canvas: 'radial-gradient(circle at 50% 50%, rgba(223, 183, 44, 0.06) 0%, rgba(15, 12, 8, 0.3) 60%, #0B0E0C 100%)', glow: 'radial-gradient(circle, rgba(223, 183, 44, 0.15) 0%, rgba(122, 31, 61, 0.1) 45%, transparent 70%)' },
+      minimal: { canvas: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 0%, #0B0E0C 100%)', glow: 'radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, rgba(138, 146, 142, 0.03) 50%, transparent 70%)' },
+      forest: { canvas: 'radial-gradient(circle at 50% 50%, rgba(15, 45, 30, 0.1) 0%, #050706 100%)', glow: 'radial-gradient(circle, rgba(159, 230, 176, 0.15) 0%, rgba(12, 36, 24, 0.2) 50%, transparent 70%)' }
+    };
+
+    themeOptions.forEach(opt => {
+      opt.addEventListener('click', () => {
+        themeOptions.forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        const theme = opt.dataset.theme;
+        const g = themeGradients[theme];
+        if (g) {
+          if (canvasContainer) canvasContainer.style.background = g.canvas;
+          if (bgGlowAura) bgGlowAura.style.background = g.glow;
+        }
+        if (mainApp && typeof mainApp.updateThemeColors === 'function') mainApp.updateThemeColors(theme);
+      });
+    });
+
+    /* ============================================================
+       12. CUSTOM CURSOR & AMBIENT GLOW
+       ============================================================ */
+    const cursor = document.getElementById('custom-cursor');
+    const cursorDot = document.getElementById('custom-cursor-dot');
+    const aura = document.getElementById('bg-glow-aura');
+
+    let cursorX = 0, cursorY = 0;
+    let auraX = window.innerWidth / 2, auraY = window.innerHeight / 2;
+    let targetX = 0, targetY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      if (cursorDot) { cursorDot.style.left = targetX + 'px'; cursorDot.style.top = targetY + 'px'; }
+    });
+
+    function animateCursor() {
+      cursorX += (targetX - cursorX) * 0.15;
+      cursorY += (targetY - cursorY) * 0.15;
+      if (cursor) { cursor.style.left = cursorX + 'px'; cursor.style.top = cursorY + 'px'; }
+      if (aura) {
+        auraX += (targetX - auraX) * 0.045;
+        auraY += (targetY - auraY) * 0.045;
+        aura.style.transform = `translate3d(${auraX - 300}px, ${auraY - 300}px, 0)`;
+      }
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    const hoverables = document.querySelectorAll('a, button, input, textarea, select, .theme-option, #mascot-berry, .app-visual-wrapper, .docs-tab-btn, .magnetic-btn');
+    hoverables.forEach(el => {
+      el.addEventListener('mouseenter', () => { if (cursor) cursor.classList.add('hover'); });
+      el.addEventListener('mouseleave', () => { if (cursor) cursor.classList.remove('hover'); });
+    });
+    window.addEventListener('mousedown', () => { if (cursor) cursor.classList.add('click'); });
+    window.addEventListener('mouseup', () => { if (cursor) cursor.classList.remove('click'); });
+
+    /* ============================================================
+       13. MAGNETIC BUTTONS
+       ============================================================ */
+    document.querySelectorAll('.magnetic-btn').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+
+    /* ============================================================
+       14. SCROLL REVEAL OBSERVER
+       ============================================================ */
+    if (!window.IntersectionObserver) {
+      document.querySelectorAll('.reveal-element').forEach(el => el.classList.add('revealed'));
+    } else {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.01, rootMargin: '0px 0px -20px 0px' });
+
+      document.querySelectorAll('.reveal-element').forEach(el => {
+        if (!el.closest('#hero')) revealObserver.observe(el);
+      });
+    }
+
+    /* ============================================================
+       15. GSAP HERO PARALLAX ON SCROLL
+       ============================================================ */
+    gsap.to('.hero-content', {
+      y: -100,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1
+      }
+    });
+
+    gsap.to('.scroll-cue', {
+      opacity: 0,
+      y: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: '70% top',
+        end: 'bottom top',
+        scrub: 1
+      }
+    });
+
+    /* ============================================================
+       16. ANIMATED STATS COUNTER
+       ============================================================ */
+    function animateCounters() {
+      const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+      const statsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = parseFloat(el.dataset.target);
+            const suffix = el.dataset.suffix || '';
+            const isDecimal = target % 1 !== 0;
+            const duration = 2000;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 4); // ease out quart
+              const currentValue = target * eased;
+
+              if (isDecimal) {
+                el.textContent = currentValue.toFixed(1) + suffix;
+              } else {
+                el.textContent = Math.floor(currentValue) + suffix;
+              }
+
+              if (progress < 1) {
+                requestAnimationFrame(updateCounter);
+              } else {
+                el.textContent = (isDecimal ? target.toFixed(1) : target) + suffix;
+              }
+            }
+
+            requestAnimationFrame(updateCounter);
+            statsObserver.unobserve(el);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      statNumbers.forEach(el => statsObserver.observe(el));
+    }
+    animateCounters();
+
+    /* ============================================================
+       17. MOBILE DRAWER MENU
+       ============================================================ */
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileDrawer = document.getElementById('mobile-drawer');
+    const mobileDrawerOverlay = document.getElementById('mobile-drawer-overlay');
+    const mobileDrawerClose = document.getElementById('mobile-drawer-close');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+    function openDrawer() {
+      if (mobileDrawer) mobileDrawer.classList.add('open');
+      if (mobileDrawerOverlay) mobileDrawerOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (mobileDrawer) mobileDrawer.classList.remove('open');
+      if (mobileDrawerOverlay) mobileDrawerOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openDrawer);
+    if (mobileDrawerClose) mobileDrawerClose.addEventListener('click', closeDrawer);
+    if (mobileDrawerOverlay) mobileDrawerOverlay.addEventListener('click', closeDrawer);
+    mobileNavLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        closeDrawer();
+      });
+    });
+
+    // Escape key closes drawer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    /* ============================================================
+       18. TEXT SPLIT PROCESSOR
+       ============================================================ */
+    function processTextSplits() {
+      document.querySelectorAll('.text-split-reveal').forEach(el => {
+        if (el.dataset.processed) return;
+        const text = el.textContent.trim();
+        el.textContent = '';
+        el.dataset.processed = 'true';
+        const words = text.split(/\s+/);
+        words.forEach((word, idx) => {
+          const wordSpan = document.createElement('span');
+          wordSpan.className = 'word';
+          const inner = document.createElement('span');
+          inner.className = 'word-inner';
+          inner.textContent = word;
+          wordSpan.appendChild(inner);
+          el.appendChild(wordSpan);
+          if (idx < words.length - 1) {
+            el.appendChild(document.createTextNode(' '));
+          }
+        });
+      });
+    }
+    processTextSplits();
+
+    /* ============================================================
+       19. GSAP SCROLL ANIMATIONS FOR NEW SECTIONS
+       ============================================================ */
+
+    // Stats cards stagger in
+    gsap.fromTo('.stat-card', 
+      { y: 60, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#stats',
+          start: 'top 80%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+
+    // Process timeline steps stagger
+    gsap.fromTo('.process-step', 
+      { y: 50, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.7,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#process',
+          start: 'top 75%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+
+    // Philosophy cards fan in
+    gsap.fromTo('.phil-card', 
+      { y: 40, opacity: 0, scale: 0.9 },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.12,
+        ease: 'back.out(1.2)',
+        scrollTrigger: {
+          trigger: '#philosophy',
+          start: 'top 70%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+
+    // Philosophy title parallax
+    gsap.from('.phil-title', {
+      y: 80,
+      opacity: 0,
+      duration: 1.2,
+      ease: 'power4.out',
+      scrollTrigger: {
+        trigger: '#philosophy',
+        start: 'top 85%',
+        toggleActions: 'play none none none'
+      }
+    });
+
+    // Footer elements stagger
+    gsap.from('.footer-top > *', {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#connect',
+        start: 'top 80%',
+        toggleActions: 'play none none none'
+      }
+    });
+
+    // Section divider line expand
+    gsap.utils.toArray('.section-divider-line').forEach(line => {
+      gsap.to(line, {
+        width: '60%',
+        duration: 1.5,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: line.parentElement,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      });
+    });
+
+    // Marquee speed up on scroll proximity
+    gsap.to('.marquee-track', {
+      x: '-=100',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.marquee-section',
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: 2
+      }
+    });
+
+    /* ============================================================
+       20. DOCS HUB ENTRANCE ANIMATION
+       ============================================================ */
+    gsap.from('.docs-card-wrapper', {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#docs-hub',
+        start: 'top 75%',
+        toggleActions: 'play none none none'
+      }
+    });
+
+    /* ============================================================
+       21. SCROLL-DRIVEN BACKGROUND COLOR SHIFT
+       ============================================================ */
+    const canvasContainerBg = document.getElementById('canvas-container');
+
+    function updateBackgroundOnScroll() {
+      const sections = ['hero', 'showcase', 'docs-hub', 'stats', 'process', 'philosophy', 'connect'];
+      const gradients = {
+        hero: 'radial-gradient(circle at 50% 50%, rgba(122, 31, 61, 0.08) 0%, rgba(15, 230, 176, 0.03) 60%, #0B0E0C 100%)',
+        showcase: 'radial-gradient(circle at 30% 60%, rgba(159, 230, 176, 0.05) 0%, rgba(122, 31, 61, 0.03) 50%, #0B0E0C 100%)',
+        'docs-hub': 'radial-gradient(circle at 70% 40%, rgba(223, 183, 44, 0.04) 0%, rgba(11, 14, 12, 0.5) 60%, #0B0E0C 100%)',
+        stats: 'radial-gradient(circle at 50% 50%, rgba(159, 230, 176, 0.06) 0%, rgba(122, 31, 61, 0.04) 50%, #0B0E0C 100%)',
+        process: 'radial-gradient(circle at 40% 50%, rgba(122, 31, 61, 0.06) 0%, #0B0E0C 100%)',
+        philosophy: 'radial-gradient(circle at 50% 80%, rgba(122, 31, 61, 0.08) 0%, transparent 70%)',
+        connect: 'radial-gradient(circle at 50% 50%, rgba(159, 230, 176, 0.04) 0%, #0B0E0C 100%)'
+      };
+
+      sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top center',
+          end: 'bottom center',
+          onEnter: () => {
+            if (canvasContainerBg) canvasContainerBg.style.background = gradients[sectionId] || gradients.hero;
+          },
+          onEnterBack: () => {
+            if (canvasContainerBg) canvasContainerBg.style.background = gradients[sectionId] || gradients.hero;
+          }
+        });
+      });
+    }
+    updateBackgroundOnScroll();
+
+    /* ============================================================
+       22. ENHANCED SMOOTH SCROLL FOR NAV LINKS
+       ============================================================ */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          const headerHeight = document.getElementById('site-header')?.offsetHeight || 80;
+          const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+
+    /* ============================================================
+       23. HORIZONTAL SCROLL CARD PARALLAX DEPTH
+       ============================================================ */
+    if (scrollTrack) {
+      const showcaseCards = scrollTrack.querySelectorAll('.app-showcase-card');
+      showcaseCards.forEach(card => {
+        const visual = card.querySelector('.app-visual-wrapper');
+        const info = card.querySelector('.app-info');
+
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width - 0.5;
+          const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+          if (visual) {
+            visual.style.transform = `perspective(800px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateZ(10px)`;
+          }
+          if (info) {
+            info.style.transform = `translateX(${x * 8}px) translateY(${y * 8}px)`;
+          }
+        });
+
+        card.addEventListener('mouseleave', () => {
+          if (visual) visual.style.transform = '';
+          if (info) info.style.transform = '';
+        });
+      });
+    }
+
+    /* ============================================================
+       24. KEYBOARD ACCESSIBILITY
+       ============================================================ */
+    // Tab navigation support for tab buttons
+    const tabBtns = document.querySelectorAll('.docs-tab-btn');
+    tabBtns.forEach((btn, idx) => {
+      btn.addEventListener('keydown', (e) => {
+        let targetIdx = idx;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          targetIdx = (idx + 1) % tabBtns.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          targetIdx = (idx - 1 + tabBtns.length) % tabBtns.length;
+        }
+        if (targetIdx !== idx) {
+          tabBtns[targetIdx].focus();
+          tabBtns[targetIdx].click();
+        }
+      });
+    });
+
+    /* ============================================================
+       25. PERFORMANCE: PAUSE ANIMATIONS WHEN TAB NOT VISIBLE
+       ============================================================ */
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Pause marquee
+        document.querySelectorAll('.marquee-track').forEach(t => {
+          t.style.animationPlayState = 'paused';
+        });
+      } else {
+        document.querySelectorAll('.marquee-track').forEach(t => {
+          t.style.animationPlayState = 'running';
+        });
+      }
+    });
+
+    console.log('%c🫐 Berry Loop', 'font-size: 24px; font-weight: bold; color: #9FE6B0; background: #0B0E0C; padding: 8px 16px; border-radius: 8px;');
+    console.log('%cSmall loop. Sharp apps. | berryloop.com', 'font-size: 12px; color: #8A928E;');
+
+    /* ============================================================
+       26. LAYOUT REFRESH TO PREVENT COLLISIONS
+       ============================================================ */
+    // Refresh ScrollTrigger to recalculate pin spacings once everything renders
+    window.addEventListener('load', () => {
+      ScrollTrigger.refresh();
+    });
+    
+    // Also refresh on font load
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        ScrollTrigger.refresh();
+      });
+    }
+
+    // Refresh on resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 250);
+    });
+  </script>
+
+</body>
+</html>
