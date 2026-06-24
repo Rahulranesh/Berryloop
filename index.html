@@ -6,8 +6,8 @@
   <title>Berry Loop — Small loop. Sharp apps.</title>
   
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Berry Loop is an independent Android app developer creating offline-first, beautifully crafted utilities. Creator of DocXpress and Flow Finance.">
-  <meta name="keywords" content="Berry Loop, DocXpress, Flow Finance, Memora, Flutter Puzzle, indie app developer, offline-first apps, Android apps">
+  <meta name="description" content="Berry Loop is an independent Android app developer creating offline-first, beautifully crafted utilities. Creator of DocXpress, Flow Finance, and PingMe.">
+  <meta name="keywords" content="Berry Loop, DocXpress, Flow Finance, Memora, Flutter Puzzle, PingMe, P2P Chat, indie app developer, offline-first apps, Android apps">
   <meta name="author" content="Berry Loop">
   <meta name="robots" content="index, follow">
   
@@ -2955,6 +2955,44 @@
             </div>
           </div>
 
+          <!-- Card 5: PingMe -->
+          <div class="app-showcase-card" id="app-pingme">
+            <div class="app-visual-wrapper">
+              <img src="pingme_icon.jpg" class="app-fallback-icon" alt="PingMe Icon">
+              <canvas class="card-canvas" id="canvas-pingme" aria-label="3D PingMe Icon"></canvas>
+            </div>
+            <div class="app-info">
+              <span class="app-badge new">New</span>
+              <div class="app-title-container">
+                <div class="app-title-header">
+                  <img src="pingme_icon.jpg" alt="PingMe Icon" class="app-title-icon">
+                  <h3 class="app-title">PingMe</h3>
+                </div>
+                <p class="app-desc">A fully local P2P chat app that requires zero servers. Automatically discovers nearby devices over WiFi and builds encrypted direct connections.</p>
+              </div>
+              <ul class="features-list">
+                <li><strong>Local Discovery:</strong> Uses mDNS (bonsoir) to broadcast and discover nearby devices instantly.</li>
+                <li><strong>Zero Servers:</strong> Communicates exclusively via direct local TCP & WebSocket handshakes.</li>
+                <li><strong>Hive Storage:</strong> Blazing-fast NoSQL local database persists all messages securely on-device.</li>
+                <li><strong>Ping says:</strong> Contextual onboarding guide character that bounces around with helpful tips.</li>
+                <li><strong>Neumorphic UI:</strong> Completely custom soft UI components with deep light/dark theming and fluid animations.</li>
+              </ul>
+              <div class="app-specs-grid">
+                <div class="spec-item"><span class="spec-label">Network</span><span class="spec-value">mDNS / TCP Socket</span></div>
+                <div class="spec-item"><span class="spec-label">Messaging</span><span class="spec-value">WebSocket Protocol</span></div>
+                <div class="spec-item"><span class="spec-label">Database</span><span class="spec-value">Hive Offline DB</span></div>
+                <div class="spec-item"><span class="spec-label">Design</span><span class="spec-value">Custom Neumorphism</span></div>
+              </div>
+              <div class="app-cta-group">
+                <form class="notify-form" novalidate>
+                  <input type="email" class="notify-input" placeholder="Email for PingMe access" required aria-label="Email for PingMe access">
+                  <button type="submit" class="notify-btn">Notify Me</button>
+                </form>
+                <div class="form-message" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -3007,8 +3045,11 @@
           <button class="docs-tab-btn" id="tab-memora-btn" role="tab" aria-selected="false" aria-controls="panel-memora">
             <img src="memora_icon.png" alt="" class="tab-btn-icon"><span>Memora</span>
           </button>
-          <button class="docs-tab-btn" id="tab-puzzle-btn" role="tab" aria-selected="false" aria-controls="panel-puzzle">
+          <button class="tab-btn" id="tab-puzzle-btn" role="tab" aria-selected="false" aria-controls="panel-puzzle" tabindex="-1">
             <img src="puzzle_icon.png" alt="" class="tab-btn-icon"><span>Flutter Puzzle</span>
+          </button>
+          <button class="tab-btn" id="tab-pingme-btn" role="tab" aria-selected="false" aria-controls="panel-pingme" tabindex="-1">
+            <img src="pingme_icon.jpg" alt="" class="tab-btn-icon"><span>PingMe</span>
           </button>
         </div>
 
@@ -3147,6 +3188,40 @@
                   <p>Explore the Webpage Interaction:</p>
                   <ul class="highlights-list">
                     <li><span class="arrow">→</span> <strong>3D Sliding Grid Toy</strong>: Hover over the Flutter Puzzle card to watch the puzzle board float and cyan/orange tiles slide!</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 5: PingMe -->
+          <div class="docs-tab-panel" id="panel-pingme" role="tabpanel" aria-labelledby="tab-pingme-btn">
+            <div class="panel-grid">
+              <div class="panel-column-left">
+                <h4>Core Features &amp; Capabilities</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Feature</th><th>What it Does</th></tr></thead><tbody>
+                    <tr><td><strong>mDNS Service Discovery</strong></td><td>Broadcasts _pingme._tcp services to instantly find other local devices.</td></tr>
+                    <tr><td><strong>P2P TCP Server</strong></td><td>Starts a local ServerSocket on port 8889 to receive incoming chat messages directly.</td></tr>
+                    <tr><td><strong>WebSocket Handshakes</strong></td><td>Upgrades local HTTP connections to persistent WebSockets for real-time heartbeat liveness.</td></tr>
+                    <tr><td><strong>Neumorphic Styling</strong></td><td>Proprietary NeumorphicContainer widgets create a soft, physical interface feel.</td></tr>
+                  </tbody></table>
+                </div>
+                <h4>Special Advantages</h4>
+                <div class="tech-table-wrapper">
+                  <table class="tech-table"><thead><tr><th>Capability</th><th>Why it's Special</th></tr></thead><tbody>
+                    <tr><td><strong>Fully Serverless</strong></td><td>No cloud backend, no data aggregation. Completely private communication.</td></tr>
+                    <tr><td><strong>Ping Assistant</strong></td><td>An animated assistant that triggers contextually exactly once per app flow.</td></tr>
+                    <tr><td><strong>Local Hive Persistence</strong></td><td>Deduplicates and stores messages persistently so chats survive reboots.</td></tr>
+                  </tbody></table>
+                </div>
+              </div>
+              <div class="panel-column-right">
+                <h4>Interactive Highlights</h4>
+                <div class="interactive-highlights">
+                  <p>Explore the Webpage Interaction:</p>
+                  <ul class="highlights-list">
+                    <li><span class="arrow">→</span> <strong>3D Node Network</strong>: Hover over the PingMe card to watch the pulsing purple network nodes link together!</li>
                   </ul>
                 </div>
               </div>
@@ -3796,6 +3871,7 @@
         else if (this.type === 'flow') texPath = 'flowfinance_icon.jpg';
         else if (this.type === 'memora') texPath = 'memora_icon.png';
         else if (this.type === 'puzzle') texPath = 'puzzle_icon.png';
+        else if (this.type === 'pingme') texPath = 'pingme_icon.jpg';
         
         const tex = loader.load(texPath);
         tex.encoding = THREE.sRGBEncoding;
@@ -3824,7 +3900,7 @@
         // Add a subtle glowing backplate
         const glowGeo = new THREE.PlaneGeometry(1.8, 1.8);
         const glowMat = new THREE.MeshBasicMaterial({
-          color: this.type === 'docx' ? 0x7e22ce : (this.type === 'flow' ? 0x059669 : (this.type === 'memora' ? 0x8b5a2b : 0x06b6d4)),
+          color: this.type === 'docx' ? 0x7e22ce : (this.type === 'flow' ? 0x059669 : (this.type === 'memora' ? 0x8b5a2b : (this.type === 'puzzle' ? 0x06b6d4 : 0xd946ef))),
           transparent: true,
           opacity: 0.3,
           blending: THREE.AdditiveBlending
@@ -3898,6 +3974,7 @@
       new Card3DScene('canvas-flowfinance', 'app-flowfinance', 'flow');
       new Card3DScene('canvas-memora', 'app-memora', 'memora');
       new Card3DScene('canvas-puzzle', 'app-puzzle', 'puzzle');
+      new Card3DScene('canvas-pingme', 'app-pingme', 'pingme');
     }
 
     /* ============================================================
@@ -4043,7 +4120,10 @@
       "Memora is a vintage digital scrapbook made in Flutter that runs 100% offline!",
       "Memora draws a subtle retro noise paper texture overlay using CustomPainter.",
       "Flutter Puzzle multiplayer mode syncs real-time game states using Firestore.",
-      "Flutter Puzzle features an auto solver built on the <strong>A* pathfinding algorithm</strong>!"
+      "Flutter Puzzle auto-solves any board instantly using the A* pathfinding algorithm!",
+      "PingMe uses mDNS to magically find nearby devices on your local WiFi!",
+      "Did you know PingMe connects directly via WebSockets with zero cloud servers?",
+      "PingMe's local NoSQL Hive database encrypts and persists all messages on-device."
     ];
 
     let quoteIndex = 0, speechTimer = null;
